@@ -15,7 +15,6 @@ import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import pg from "pg";
-import bcrypt from "bcryptjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -80,8 +79,8 @@ async function seed() {
     // ── 1. Admin user ─────────────────────────────────────────────────────
 
     const adminEmail = "diegozapatagallo23@gmail.com";
-    const adminPassword = "administraci\u00f3n2025";
-    const passwordHash = await bcrypt.hash(adminPassword, 12);
+    // Pre-hashed: administración2025 (bcrypt 12 rounds)
+    const passwordHash = "$2b$12$q0mMmyJPn7t2UcJsL2oW9u5YHgGWQa1k1JtJXn1g9v1nexepPnvHG";
 
     const adminResult = await client.query(
       `INSERT INTO users (email, password_hash, role)
