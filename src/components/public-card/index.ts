@@ -1,0 +1,13 @@
+export { CardHeader } from "./CardHeader";
+export { ContactButtons } from "./ContactButtons";
+export { SocialLinks } from "./SocialLinks";
+export type { SocialLink, SocialNetwork } from "./SocialLinks";
+export { VideoSection } from "./VideoSection";
+export { ImageGallery } from "./ImageGallery";
+export type { GalleryImage } from "./ImageGallery";
+export { TestimonialsSection } from "./TestimonialsSection";
+export type { Testimonial } from "./TestimonialsSection";
+export { CertificatesSection } from "./CertificatesSection";
+export type { Certificate } from "./CertificatesSection";
+export { CardFooter } from "./CardFooter";
+export { SectorRenderer } from "./SectorRenderer";
