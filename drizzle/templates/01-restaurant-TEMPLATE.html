@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{fullName}} - Restaurant Digital Card</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --accent: #c9a84a;
+            --accent-hover: #d4b85a;
+            --accent-light: #f5d98a;
+            --accent-dark: #8b6914;
+            --bg-dark: #0a0a0a;
+            --bg-section: rgba(26,26,26,0.85);
+            --text-primary: #ffffff;
+            --text-muted: rgba(255,255,255,0.5);
+        }
+
+        html { overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+        
+        /* Background Container */
+        .bg-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
+        .bg-images { position: absolute; width: 200%; height: 200%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; animation: slowPan 30s ease-in-out infinite alternate; }
+        .bg-image { background-size: cover; background-position: center; filter: brightness(0.3) saturate(1.2); }
+        @keyframes slowPan { 0% { transform: translate(0, 0) scale(1.1); } 50% { transform: translate(-15%, -10%) scale(1.15); } 100% { transform: translate(-25%, -20%) scale(1.1); } }
+        .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(10,10,10,0.92) 0%, rgba(20,15,10,0.85) 30%, rgba(30,20,10,0.8) 50%, rgba(20,15,10,0.85) 70%, rgba(10,10,10,0.95) 100%); }
+        
+        /* Fire Particles */
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+        .particle { position: absolute; bottom: -20px; width: 8px; height: 8px; border-radius: 50%; animation: rise 4s ease-in infinite; }
+        .particle:nth-child(1) { left: 10%; background: radial-gradient(circle, #ff6b35, #ff4500); animation-delay: 0s; animation-duration: 5s; }
+        .particle:nth-child(2) { left: 20%; background: radial-gradient(circle, #ffd700, #ff8c00); animation-delay: 0.5s; animation-duration: 4.5s; width: 6px; height: 6px; }
+        .particle:nth-child(3) { left: 35%; background: radial-gradient(circle, #ff6b35, var(--accent)); animation-delay: 1s; animation-duration: 5.5s; }
+        .particle:nth-child(4) { left: 45%; background: radial-gradient(circle, #ffd700, #ff6b35); animation-delay: 1.5s; animation-duration: 4s; width: 10px; height: 10px; }
+        .particle:nth-child(5) { left: 55%; background: radial-gradient(circle, #ff8c00, #ff4500); animation-delay: 2s; animation-duration: 5s; }
+        .particle:nth-child(6) { left: 65%; background: radial-gradient(circle, var(--accent), #ff6b35); animation-delay: 0.3s; animation-duration: 4.8s; width: 5px; height: 5px; }
+        .particle:nth-child(7) { left: 75%; background: radial-gradient(circle, #ffd700, var(--accent)); animation-delay: 2.5s; animation-duration: 5.2s; }
+        .particle:nth-child(8) { left: 85%; background: radial-gradient(circle, #ff6b35, #ff4500); animation-delay: 1.2s; animation-duration: 4.3s; width: 7px; height: 7px; }
+        .particle:nth-child(9) { left: 25%; background: radial-gradient(circle, #ff8c00, #ffd700); animation-delay: 3s; animation-duration: 5.5s; }
+        .particle:nth-child(10) { left: 50%; background: radial-gradient(circle, var(--accent), #ff8c00); animation-delay: 0.8s; animation-duration: 4.7s; width: 9px; height: 9px; }
+        .particle:nth-child(11) { left: 70%; background: radial-gradient(circle, #ff4500, #ffd700); animation-delay: 2.2s; animation-duration: 5.3s; width: 4px; height: 4px; }
+        .particle:nth-child(12) { left: 90%; background: radial-gradient(circle, #ffd700, var(--accent)); animation-delay: 1.8s; animation-duration: 4.5s; }
+        @keyframes rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 0.8; } 50% { opacity: 0.6; } 100% { transform: translateY(-100vh) scale(0.3); opacity: 0; } }
+        
+        .card { max-width: 500px; width: 100%; background: transparent; margin: 0 auto; min-height: 100vh; position: relative; z-index: 2; }
+        .scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--accent)); z-index: 9999; }
+        .header { background: transparent; padding: 40px 25px 30px; text-align: center; }
+        .top-buttons { display: flex; justify-content: space-between; margin-bottom: 35px; gap: 12px; }
+        .refer-btn, .review-btn { flex: 1; background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 12px 18px; border-radius: 25px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; min-width: 0; overflow: hidden; }
+        .refer-btn:hover, .review-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .refer-btn i, .review-btn i { color: var(--accent); }
+        .profile-image { width: min(150px, 40vw); height: min(150px, 40vw); border-radius: 50%; margin: 0 auto 25px; position: relative; }
+        .profile-image::before { content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border-radius: 50%; background: conic-gradient(from 0deg, var(--accent), var(--accent-light), var(--accent), var(--accent-dark), var(--accent)); animation: rotateRing 8s linear infinite; }
+        @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .profile-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid #111; position: relative; z-index: 1; }
+        .name { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 38px; font-weight: 600; margin-bottom: 8px; }
+        .title { font-size: 15px; color: var(--accent); margin-bottom: 5px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+        .company { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+        .cuisine-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(201,168,74,0.15); border: 1px solid rgba(201,168,74,0.3); padding: 8px 16px; border-radius: 20px; margin-bottom: 25px; font-size: 13px; color: var(--accent); }
+        .main-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-bottom: 10px; }
+        .book-btn { background: var(--accent); color: #111; border: none; padding: 16px; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; min-width: 0; overflow: hidden; }
+        .book-btn:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(201,168,74,0.3); }
+        .save-btn { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.3); padding: 16px; border-radius: 30px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; min-width: 0; overflow: hidden; }
+        .save-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+        .contact-section { background: var(--bg-section); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 30px 25px; border-radius: 25px 25px 0 0; margin-top: 20px; border-top: 1px solid rgba(201,168,74,0.2); }
+        .contact-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .contact-row:last-child { margin-bottom: 0; }
+        .contact-icon { display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; transition: transform 0.3s; }
+        .contact-icon:hover { transform: translateY(-3px); }
+        .icon-circle { width: 60px; height: 60px; border-radius: 50%; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #333; font-size: 22px; transition: all 0.3s; }
+        .contact-icon:hover .icon-circle { background: #fff; box-shadow: 0 5px 20px rgba(255,255,255,0.2); }
+        .icon-circle.gold { background: var(--accent); color: #111; }
+        .icon-circle.delivery { background: #ff5722; color: #fff; }
+        .icon-label { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.7); }
+        .bottom-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 25px; background: var(--bg-section); backdrop-filter: blur(15px); }
+        .website-btn { background: var(--accent); color: #111; border: none; padding: 16px; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; min-width: 0; overflow: hidden; }
+        .website-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+        .share-btn { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.3); padding: 16px; border-radius: 30px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; min-width: 0; overflow: hidden; }
+        .share-btn:hover { background: rgba(255,255,255,0.1); }
+        .section-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; font-weight: 500; text-align: center; margin-bottom: 25px; }
+        .menu-section { padding: 40px 25px; background: rgba(13,13,13,0.9); backdrop-filter: blur(10px); }
+        .menu-grid { display: grid; gap: 15px; }
+        .menu-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(201,168,74,0.2); border-radius: 16px; padding: 20px; display: flex; gap: 15px; transition: all 0.3s; }
+        .menu-item:hover { background: rgba(201,168,74,0.08); border-color: rgba(201,168,74,0.4); transform: translateX(5px); }
+        .menu-item-img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+        .menu-item-content { flex: 1; }
+        .menu-item-name { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 18px; font-weight: 600; margin-bottom: 5px; }
+        .menu-item-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px; }
+        .menu-item-price { font-size: 16px; font-weight: 600; color: var(--accent); }
+        .view-menu-btn { width: 100%; background: transparent; color: var(--accent); border: 1.5px solid var(--accent); padding: 16px; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; margin-top: 20px; }
+        .view-menu-btn:hover { background: rgba(201,168,74,0.1); transform: translateY(-2px); }
+        .hours-section { padding: 40px 25px; background: rgba(17,17,17,0.88); backdrop-filter: blur(10px); }
+        .hours-grid { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 25px; }
+        .hours-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hours-row:last-child { border-bottom: none; }
+        .hours-day { font-size: 14px; color: rgba(255,255,255,0.7); }
+        .hours-time { font-size: 14px; font-weight: 500; }
+        .hours-time.closed { color: #ff5722; }
+        .hours-time.highlight { color: var(--accent); }
+        .experience-section { padding: 40px 25px; background: rgba(13,13,13,0.9); backdrop-filter: blur(10px); }
+        .video-container { margin-bottom: 25px; border-radius: 20px; overflow: hidden; background: #1a1a1a; }
+        .video-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, #1a1a1a, #2a2a2a); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .video-placeholder i { font-size: 50px; color: #ff0000; background: rgba(0,0,0,0.5); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
+        .video-placeholder:hover i { transform: scale(1.1); }
+        .experience-text { text-align: center; color: rgba(255,255,255,0.6); font-size: 14px; line-height: 1.8; margin-bottom: 25px; font-style: italic; }
+        .reserve-btn { width: 100%; background: var(--accent); color: #111; border: none; padding: 18px; border-radius: 30px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; margin-bottom: 30px; }
+        .reserve-btn:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 5px 25px rgba(201,168,74,0.4); }
+        .certifications { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .cert-badge { background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px 20px; text-align: center; transition: all 0.3s; }
+        .cert-badge:hover { border-color: rgba(201,168,74,0.3); transform: translateY(-3px); }
+        .cert-badge i { display: block; margin-bottom: 8px; font-size: 24px; color: var(--accent); }
+        .cert-badge div { font-size: 11px; line-height: 1.4; }
+        .testimonials-section { padding: 40px 25px; background: rgba(17,17,17,0.88); backdrop-filter: blur(10px); overflow: hidden; }
+        .testimonials-marquee { position: relative; width: 100%; overflow: hidden; margin-bottom: 25px; }
+        .testimonials-marquee::before, .testimonials-marquee::after { content: ''; position: absolute; top: 0; width: 40px; height: 100%; z-index: 2; pointer-events: none; }
+        .testimonials-marquee::before { left: 0; background: linear-gradient(to right, rgba(17,17,17,0.95), transparent); }
+        .testimonials-marquee::after { right: 0; background: linear-gradient(to left, rgba(17,17,17,0.95), transparent); }
+        .testimonials-track { display: flex; gap: 20px; animation: scrollMarquee 30s linear infinite; width: max-content; }
+        .testimonials-track:hover { animation-play-state: paused; }
+        @keyframes scrollMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .testimonial-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(201,168,74,0.2); border-radius: 16px; padding: 20px; min-width: min(280px, 85vw); max-width: 280px; flex-shrink: 0; }
+        .testimonial-stars { color: var(--accent); font-size: 14px; margin-bottom: 12px; }
+        .testimonial-text { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 12px; font-style: italic; }
+        .testimonial-author { font-size: 12px; font-weight: 600; }
+        .testimonial-source { font-size: 11px; color: rgba(255,255,255,0.4); }
+        .review-action-btn { width: 100%; background: transparent; color: var(--accent); border: 1.5px solid var(--accent); padding: 16px; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; }
+        .review-action-btn:hover { background: rgba(201,168,74,0.1); transform: translateY(-2px); }
+        .showcase-section { padding: 40px 25px; background: rgba(13,13,13,0.9); backdrop-filter: blur(10px); }
+        .gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 30px; }
+        .gallery-item { aspect-ratio: 1; border-radius: 12px; overflow: hidden; transition: all 0.3s; }
+        .gallery-item:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(201,168,74,0.3); z-index: 2; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .gallery-item:hover img { transform: scale(1.1); }
+        .share-info-btn { width: 100%; background: var(--accent); color: #111; border: none; padding: 18px; border-radius: 30px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .share-info-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+        .get-card-btn { width: 100%; background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.2); padding: 16px; border-radius: 30px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; }
+        .get-card-btn:hover { background: rgba(255,255,255,0.05); }
+        .footer { padding: 30px 25px; background: rgba(17,17,17,0.95); backdrop-filter: blur(15px); text-align: center; border-top: 1px solid rgba(201,168,74,0.2); }
+        .footer-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 24px; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+        .footer-tagline { font-size: 12px; color: rgba(255,255,255,0.4); font-style: italic; margin-bottom: 15px; }
+        .footer-address { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+        @media (max-width: 768px) {
+            .name { font-size: 34px; }
+            .section-title { font-size: 24px; }
+            .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .icon-circle { width: 55px; height: 55px; font-size: 20px; }
+            .contact-row { gap: 12px; }
+            .menu-item { gap: 12px; }
+            .menu-item-img { width: 70px; height: 70px; }
+            .top-buttons { flex-direction: column; }
+            .bottom-buttons { grid-template-columns: 1fr; }
+            .main-buttons { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) { .top-buttons { flex-direction: column; } .name { font-size: 32px; } .icon-circle { width: 50px; height: 50px; font-size: 18px; } .gallery { grid-template-columns: repeat(2, 1fr); } .menu-item { flex-direction: column; text-align: center; } .menu-item-img { width: 100%; height: 150px; } }
+    </style>
+</head>
+<body>
+    <!-- Background Images Collage -->
+    <div class="bg-container">
+        <div class="bg-images">
+            <div class="bg-image" style="background-image: url('{{bgImage1}}')"></div>
+            <div class="bg-image" style="background-image: url('{{bgImage2}}')"></div>
+            <div class="bg-image" style="background-image: url('{{bgImage3}}')"></div>
+            <div class="bg-image" style="background-image: url('{{bgImage4}}')"></div>
+        </div>
+        <div class="bg-overlay"></div>
+    </div>
+
+    <!-- Fire/Flame Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <div class="card">
+        <div class="header">
+            <div class="top-buttons">
+                <button class="refer-btn" onclick="window.location.href='{{referBtnUrl}}'">
+                    <i class="{{referBtnIcon}}"></i>{{referBtnLabel}}
+                </button>
+                <button class="review-btn" onclick="window.location.href='{{reviewBtnUrl}}'">
+                    <i class="{{reviewBtnIcon}}"></i>{{reviewBtnLabel}}
+                </button>
+            </div>
+            <div class="profile-image">
+                <img src="{{profileImage}}" alt="{{fullName}}">
+            </div>
+            <h1 class="name">{{fullName}}</h1>
+            <div class="title">{{title}}</div>
+            <div class="company">{{company}}</div>
+            <div class="cuisine-badge"><i class="fas fa-utensils"></i>{{cuisineBadge}}</div>
+            <div class="main-buttons">
+                <button class="book-btn" onclick="window.location.href='{{reserveBtnUrl}}'">
+                    <i class="fas fa-calendar-check"></i>{{reserveBtnLabel}}
+                </button>
+                <button class="save-btn" onclick="saveContact()">
+                    <i class="fas fa-address-card"></i>{{saveContactBtnLabel}}
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact Icons -->
+        <div class="contact-section">
+            <div class="contact-row">
+                <a href="tel:{{phone}}" class="contact-icon">
+                    <div class="icon-circle"><i class="fas fa-phone"></i></div>
+                    <span class="icon-label">Call</span>
+                </a>
+                <a href="mailto:{{email}}" class="contact-icon">
+                    <div class="icon-circle"><i class="fas fa-envelope"></i></div>
+                    <span class="icon-label">Email</span>
+                </a>
+                <a href="sms:{{phone}}" class="contact-icon">
+                    <div class="icon-circle"><i class="fas fa-comment-dots"></i></div>
+                    <span class="icon-label">Text</span>
+                </a>
+                <a href="https://wa.me/{{whatsapp}}" class="contact-icon">
+                    <div class="icon-circle gold"><i class="fab fa-whatsapp"></i></div>
+                    <span class="icon-label">WhatsApp</span>
+                </a>
+            </div>
+            <div class="contact-row">
+                <a href="{{linkedin}}" class="contact-icon">
+                    <div class="icon-circle"><i class="fab fa-linkedin-in"></i></div>
+                    <span class="icon-label">LinkedIn</span>
+                </a>
+                <a href="{{websiteUrl}}" class="contact-icon">
+                    <div class="icon-circle"><i class="fas fa-globe"></i></div>
+                    <span class="icon-label">Website</span>
+                </a>
+                <a href="{{instagram}}" class="contact-icon">
+                    <div class="icon-circle"><i class="fab fa-instagram"></i></div>
+                    <span class="icon-label">Instagram</span>
+                </a>
+                <a href="{{facebook}}" class="contact-icon">
+                    <div class="icon-circle"><i class="fab fa-facebook-f"></i></div>
+                    <span class="icon-label">Facebook</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bottom Buttons -->
+        <div class="bottom-buttons">
+            <button class="website-btn" onclick="window.location.href='{{viewMenuBtnUrl}}'">
+                <i class="fas fa-book-open"></i>{{websiteBtnLabel}}
+            </button>
+            <button class="share-btn" onclick="shareCard()">
+                <i class="fas fa-share-nodes"></i>{{shareBtnLabel}}
+            </button>
+        </div>
+
+        <!-- Menu Section -->
+        <div class="menu-section">
+            <h2 class="section-title">{{menuSectionTitle}}</h2>
+            <div class="menu-grid">
+                <div class="menu-item">
+                    <img src="{{menuItem1Image}}" class="menu-item-img" alt="{{menuItem1Name}}">
+                    <div class="menu-item-content">
+                        <div class="menu-item-name">{{menuItem1Name}}</div>
+                        <div class="menu-item-desc">{{menuItem1Desc}}</div>
+                        <div class="menu-item-price">{{menuItem1Price}}</div>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <img src="{{menuItem2Image}}" class="menu-item-img" alt="{{menuItem2Name}}">
+                    <div class="menu-item-content">
+                        <div class="menu-item-name">{{menuItem2Name}}</div>
+                        <div class="menu-item-desc">{{menuItem2Desc}}</div>
+                        <div class="menu-item-price">{{menuItem2Price}}</div>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <img src="{{menuItem3Image}}" class="menu-item-img" alt="{{menuItem3Name}}">
+                    <div class="menu-item-content">
+                        <div class="menu-item-name">{{menuItem3Name}}</div>
+                        <div class="menu-item-desc">{{menuItem3Desc}}</div>
+                        <div class="menu-item-price">{{menuItem3Price}}</div>
+                    </div>
+                </div>
+            </div>
+            <button class="view-menu-btn" onclick="window.location.href='{{fullMenuBtnUrl}}'">
+                <i class="fas fa-book-open"></i>{{fullMenuBtnLabel}}
+            </button>
+        </div>
+
+        <!-- Hours Section -->
+        <div class="hours-section">
+            <h2 class="section-title">{{hoursSectionTitle}}</h2>
+            <div class="hours-grid">
+                <div class="hours-row">
+                    <span class="hours-day">{{hours1Day}}</span>
+                    <span class="hours-time {{hours1Status}}">{{hours1Time}}</span>
+                </div>
+                <div class="hours-row">
+                    <span class="hours-day">{{hours2Day}}</span>
+                    <span class="hours-time {{hours2Status}}">{{hours2Time}}</span>
+                </div>
+                <div class="hours-row">
+                    <span class="hours-day">{{hours3Day}}</span>
+                    <span class="hours-time {{hours3Status}}">{{hours3Time}}</span>
+                </div>
+                <div class="hours-row">
+                    <span class="hours-day">{{hours4Day}}</span>
+                    <span class="hours-time {{hours4Status}}">{{hours4Time}}</span>
+                </div>
+                <div class="hours-row">
+                    <span class="hours-day">{{hours5Day}}</span>
+                    <span class="hours-time {{hours5Status}}">{{hours5Time}}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Experience/Story Section -->
+        <div class="experience-section">
+            <h2 class="section-title">{{experienceSectionTitle}}</h2>
+            <div class="video-container">
+                <div class="video-placeholder" onclick="window.location.href='{{videoUrl}}'">
+                    <i class="fab fa-youtube"></i>
+                </div>
+            </div>
+            <div class="experience-text">"{{experienceText}}"</div>
+            <button class="reserve-btn" onclick="window.location.href='{{experienceCtaBtnUrl}}'">
+                <i class="{{experienceCtaBtnIcon}}"></i>{{experienceCtaBtnLabel}}
+            </button>
+            <div class="certifications">
+                <div class="cert-badge">
+                    <i class="{{cert1Icon}}"></i>
+                    <div>{{cert1Line1}}<br>{{cert1Line2}}</div>
+                </div>
+                <div class="cert-badge">
+                    <i class="{{cert2Icon}}"></i>
+                    <div>{{cert2Line1}}<br>{{cert2Line2}}</div>
+                </div>
+                <div class="cert-badge">
+                    <i class="{{cert3Icon}}"></i>
+                    <div>{{cert3Line1}}<br>{{cert3Line2}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testimonials Section -->
+        <div class="testimonials-section">
+            <h2 class="section-title">{{testimonialsSectionTitle}}</h2>
+            <div class="testimonials-marquee">
+                <div class="testimonials-track">
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial1Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial1Author}}</div>
+                        <div class="testimonial-source">{{testimonial1Source}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial2Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial2Author}}</div>
+                        <div class="testimonial-source">{{testimonial2Source}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial3Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial3Author}}</div>
+                        <div class="testimonial-source">{{testimonial3Source}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial4Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial4Author}}</div>
+                        <div class="testimonial-source">{{testimonial4Source}}</div>
+                    </div>
+                    <!-- Duplicates for infinite scroll -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial1Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial1Author}}</div>
+                        <div class="testimonial-source">{{testimonial1Source}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial2Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial2Author}}</div>
+                        <div class="testimonial-source">{{testimonial2Source}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial3Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial3Author}}</div>
+                        <div class="testimonial-source">{{testimonial3Source}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial4Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial4Author}}</div>
+                        <div class="testimonial-source">{{testimonial4Source}}</div>
+                    </div>
+                </div>
+            </div>
+            <button class="review-action-btn" onclick="window.location.href='{{leaveReviewUrl}}'">
+                <i class="fas fa-star"></i>{{leaveReviewBtnLabel}}
+            </button>
+        </div>
+
+        <!-- Gallery/Showcase Section -->
+        <div class="showcase-section">
+            <h2 class="section-title">{{gallerySectionTitle}}</h2>
+            <div class="gallery">
+                <div class="gallery-item"><img src="{{gallery1Image}}" alt="Gallery 1"></div>
+                <div class="gallery-item"><img src="{{gallery2Image}}" alt="Gallery 2"></div>
+                <div class="gallery-item"><img src="{{gallery3Image}}" alt="Gallery 3"></div>
+                <div class="gallery-item"><img src="{{gallery4Image}}" alt="Gallery 4"></div>
+                <div class="gallery-item"><img src="{{gallery5Image}}" alt="Gallery 5"></div>
+                <div class="gallery-item"><img src="{{gallery6Image}}" alt="Gallery 6"></div>
+            </div>
+            <button class="share-info-btn" onclick="shareCard()">
+                <i class="fas fa-share-nodes"></i>{{shareInfoBtnLabel}}
+            </button>
+            <button class="get-card-btn" onclick="window.location.href='{{getCardUrl}}'">
+                {{getCardBtnLabel}}
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-logo">{{fullName}}</div>
+            <div class="footer-tagline">"{{footerTagline}}"</div>
+            <div class="footer-address">{{footerAddress}}</div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        window.addEventListener('scroll', () => {
+            const scrollProgress = document.getElementById('scrollProgress');
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            scrollProgress.style.width = (scrollTop / scrollHeight) * 100 + '%';
+        });
+
+        function saveContact() {
+            const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:{{fullName}}
+ORG:{{company}}
+TITLE:{{title}} - {{cuisineBadge}}
+TEL:{{phone}}
+EMAIL:{{email}}
+URL:{{websiteUrl}}
+ADR:{{footerAddress}}
+END:VCARD`;
+            const blob = new Blob([vcard], { type: 'text/vcard' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '{{fullName}}.vcf';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function shareCard() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{fullName}} - {{title}}',
+                    text: '{{cuisineBadge}}',
+                    url: window.location.href
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                navigator.clipboard

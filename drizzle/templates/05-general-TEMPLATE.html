@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{fullName}} - Digital Business Card</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --blue-dark: #0B3D5C;
+            --blue-deep: #061d2e;
+            --blue-medium: #1a5276;
+            --blue-accent: #38bdf8;
+            --orange: #F5A623;
+            --orange-dark: #E8971B;
+            --white: #ffffff;
+            --gray-light: #f8f9fa;
+            --text-dark: #1a1a1a;
+        }
+
+        html { overflow-x: hidden; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--blue-deep); color: #fff; min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+        .card { max-width: 500px; width: 100%; margin: 0 auto; position: relative; min-height: 100vh; overflow: hidden; }
+
+        /* Aurora Background Effect */
+        .aurora-section { position: relative; overflow: hidden; }
+        .aurora-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 50%), radial-gradient(ellipse 60% 40% at 20% 100%, rgba(14, 165, 233, 0.1) 0%, transparent 50%), radial-gradient(ellipse 50% 30% at 80% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+        .aurora-section::after { content: ''; position: absolute; top: 30%; left: -50%; width: 200%; height: 1px; background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), rgba(255,255,255,0.2), rgba(56, 189, 248, 0.4), transparent); transform: rotate(-5deg); animation: streak 6s ease-in-out infinite; pointer-events: none; z-index: 0; }
+        @keyframes streak { 0%, 100% { opacity: 0.3; transform: rotate(-5deg) translateX(-10%); } 50% { opacity: 0.7; transform: rotate(-5deg) translateX(10%); } }
+
+        /* Header Section */
+        .header { background: linear-gradient(180deg, var(--blue-deep) 0%, var(--blue-dark) 100%); padding: 40px 25px 50px; text-align: center; position: relative; z-index: 1; }
+        .top-buttons { display: flex; justify-content: space-between; margin-bottom: 35px; gap: 12px; position: relative; z-index: 2; }
+        .refer-btn, .review-btn { flex: 1; background: var(--orange); color: var(--text-dark); border: none; padding: 12px 16px; border-radius: 25px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .refer-btn:hover, .review-btn:hover { background: var(--orange-dark); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(245, 166, 35, 0.4); }
+
+        /* Profile Image with Rotating Ring */
+        .profile-image { width: min(150px, 40vw); height: min(150px, 40vw); border-radius: 50%; margin: 0 auto 25px; position: relative; z-index: 2; }
+        .profile-image::before { content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border-radius: 50%; background: conic-gradient(from 0deg, var(--orange), #fcd34d, var(--orange), #d97706, var(--orange)); animation: rotateRing 8s linear infinite; }
+        .profile-image::after { content: ''; position: absolute; top: -15px; left: -15px; right: -15px; bottom: -15px; border-radius: 50%; background: radial-gradient(circle, rgba(245, 166, 35, 0.3) 0%, transparent 70%); animation: pulseGlow 3s ease-in-out infinite; z-index: -1; }
+        @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulseGlow { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+        .profile-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid var(--white); position: relative; z-index: 1; }
+
+        .name { font-size: 32px; font-weight: 800; color: var(--white); margin-bottom: 8px; letter-spacing: -0.5px; position: relative; z-index: 2; }
+        .title { font-size: 15px; color: rgba(255, 255, 255, 0.85); margin-bottom: 5px; font-weight: 500; position: relative; z-index: 2; }
+        .company { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-bottom: 30px; position: relative; z-index: 2; }
+
+        .main-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; position: relative; z-index: 2; }
+        .book-btn { background: var(--orange); color: var(--text-dark); border: none; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .book-btn:hover { background: var(--orange-dark); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(245, 166, 35, 0.4); }
+        .save-btn { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); color: var(--white); border: 1px solid rgba(255, 255, 255, 0.3); padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .save-btn:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-2px); }
+
+        /* Contact Section */
+        .contact-section { background: var(--white); padding: 35px 25px; }
+        .contact-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .contact-row:last-child { margin-bottom: 0; }
+        .contact-icon { display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; transition: transform 0.3s ease; }
+        .contact-icon:hover { transform: translateY(-3px); }
+        .icon-circle { width: 55px; height: 55px; border-radius: 50%; background: var(--blue-dark); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 20px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(11, 61, 92, 0.2); }
+        .contact-icon:hover .icon-circle { box-shadow: 0 6px 25px rgba(11, 61, 92, 0.3); transform: scale(1.05); }
+        .icon-circle.orange { background: var(--orange); color: var(--text-dark); box-shadow: 0 4px 15px rgba(245, 166, 35, 0.3); }
+        .icon-label { font-size: 11px; font-weight: 600; color: var(--text-dark); }
+
+        .bottom-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 0 25px 30px; background: var(--white); }
+        .website-btn { background: var(--blue-dark); color: var(--white); border: none; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .website-btn:hover { background: var(--blue-medium); transform: translateY(-2px); }
+        .share-btn { background: var(--gray-light); color: var(--text-dark); border: 2px solid #e0e0e0; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .share-btn:hover { background: #e8e8e8; transform: translateY(-2px); }
+
+        .section-title { font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 25px; letter-spacing: -0.5px; }
+        .section-title.white { color: var(--white); position: relative; z-index: 2; }
+        .section-title.dark { color: var(--text-dark); }
+
+        /* Experience Section */
+        .experience-section { background: linear-gradient(180deg, var(--blue-dark) 0%, var(--blue-deep) 100%); padding: 50px 25px; position: relative; }
+        .video-container { margin-bottom: 25px; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); position: relative; z-index: 2; }
+        .video-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, rgba(11, 61, 92, 0.9) 0%, rgba(6, 29, 46, 0.95) 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .video-placeholder i { font-size: 50px; color: #ff0000; background: rgba(255, 255, 255, 0.95); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3); }
+        .video-placeholder:hover i { transform: scale(1.1); box-shadow: 0 8px 35px rgba(255, 255, 255, 0.4); }
+
+        .experience-text { text-align: center; font-size: 14px; color: rgba(255, 255, 255, 0.8); line-height: 1.8; margin-bottom: 25px; padding: 0 10px; position: relative; z-index: 2; }
+
+        .estimate-btn { width: 100%; background: var(--orange); color: var(--text-dark); border: none; padding: 18px; border-radius: 30px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; margin-bottom: 30px; box-shadow: 0 5px 25px rgba(245, 166, 35, 0.4); position: relative; z-index: 2; }
+        .estimate-btn:hover { background: var(--orange-dark); transform: translateY(-3px); box-shadow: 0 8px 35px rgba(245, 166, 35, 0.5); }
+
+        .certifications { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; position: relative; z-index: 2; }
+        .cert-badge { background: var(--white); border-radius: 14px; padding: 18px 22px; text-align: center; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+        .cert-badge:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); }
+        .cert-badge i { display: block; margin-bottom: 10px; font-size: 28px; }
+        .cert-badge div { font-size: 11px; font-weight: 800; line-height: 1.4; color: var(--text-dark); }
+
+        /* Testimonials Section */
+        .testimonials-section { padding: 50px 25px; background: var(--white); }
+        .review-action-btn { width: 100%; background: var(--blue-dark); color: var(--white); border: none; padding: 16px; border-radius: 30px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; }
+        .review-action-btn:hover { background: var(--blue-medium); transform: translateY(-2px); }
+
+        /* Showcase Section */
+        .showcase-section { background: linear-gradient(180deg, var(--blue-deep) 0%, var(--blue-dark) 100%); padding: 50px 25px; position: relative; }
+        .gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 30px; position: relative; z-index: 2; }
+        .gallery-item { aspect-ratio: 1; border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
+        .gallery-item:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); z-index: 3; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .gallery-item:hover img { transform: scale(1.1); }
+
+        .share-info-btn { width: 100%; background: var(--orange); color: var(--text-dark); border: none; padding: 18px; border-radius: 30px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; position: relative; z-index: 2; }
+        .share-info-btn:hover { background: var(--orange-dark); transform: translateY(-2px); }
+        .get-card-btn { width: 100%; background: transparent; color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); padding: 16px; border-radius: 30px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; position: relative; z-index: 2; }
+        .get-card-btn:hover { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8); }
+
+        /* Footer */
+        .footer { padding: 35px 25px; background: var(--white); text-align: center; }
+        .footer-badge { display: inline-flex; align-items: center; gap: 15px; background: var(--gray-light); padding: 20px 25px; border-radius: 16px; }
+        .cert-icon { width: min(50px, 15vw); height: min(50px, 15vw); background: var(--blue-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 22px; }
+        .cert-text { text-align: left; }
+        .cert-text .title { font-size: 14px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
+        .cert-text .subtitle { font-size: 11px; color: var(--text-dark); opacity: 0.7; line-height: 1.4; }
+
+        @media (max-width: 768px) {
+            .name { font-size: 30px; }
+            .title { font-size: 14px; }
+            .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .contact-row { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+            .icon-circle { width: 52px; height: 52px; font-size: 19px; }
+            .icon-label { font-size: 10px; }
+            .cert-badge { padding: 15px 18px; }
+            .cert-badge i { font-size: 26px; }
+            .top-buttons { flex-direction: column; }
+            .bottom-buttons { grid-template-columns: 1fr; }
+            .main-buttons { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) { .top-buttons { flex-direction: column; } .name { font-size: 28px; } .icon-circle { width: 50px; height: 50px; font-size: 18px; } .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <!-- Header -->
+        <div class="header aurora-section">
+            <div class="top-buttons">
+                <button class="refer-btn" onclick="window.location.href='{{referBtnUrl}}'"><i class="{{referBtnIcon}}"></i>{{referBtnLabel}}</button>
+                <button class="review-btn" onclick="window.location.href='{{reviewBtnUrl}}'"><i class="{{reviewBtnIcon}}"></i>{{reviewBtnLabel}}</button>
+            </div>
+
+            <div class="profile-image"><img src="{{profileImage}}" alt="{{fullName}}"></div>
+            <h1 class="name">{{fullName}}</h1>
+            <div class="title">{{title}}</div>
+            <div class="company">{{company}}</div>
+
+            <div class="main-buttons">
+                <button class="book-btn" onclick="window.location.href='{{bookBtnUrl}}'"><i class="fas fa-calendar-check"></i>{{bookBtnLabel}}</button>
+                <button class="save-btn" onclick="saveContact()"><i class="fas fa-address-card"></i>{{saveContactBtnLabel}}</button>
+            </div>
+        </div>
+
+        <!-- Contact Icons -->
+        <div class="contact-section">
+            <div class="contact-row">
+                <a href="tel:{{phone}}" class="contact-icon"><div class="icon-circle"><i class="fas fa-phone"></i></div><span class="icon-label">Call</span></a>
+                <a href="mailto:{{email}}" class="contact-icon"><div class="icon-circle"><i class="fas fa-envelope"></i></div><span class="icon-label">Email</span></a>
+                <a href="sms:{{phone}}" class="contact-icon"><div class="icon-circle"><i class="fas fa-comment-dots"></i></div><span class="icon-label">Text</span></a>
+                <a href="https://wa.me/{{whatsapp}}" class="contact-icon"><div class="icon-circle orange"><i class="fab fa-whatsapp"></i></div><span class="icon-label">WhatsApp</span></a>
+            </div>
+            <div class="contact-row">
+                <a href="{{linkedin}}" class="contact-icon"><div class="icon-circle"><i class="fab fa-linkedin-in"></i></div><span class="icon-label">LinkedIn</span></a>
+                <a href="{{websiteUrl}}" class="contact-icon"><div class="icon-circle"><i class="fas fa-globe"></i></div><span class="icon-label">Website</span></a>
+                <a href="{{facebook}}" class="contact-icon"><div class="icon-circle"><i class="fab fa-facebook-f"></i></div><span class="icon-label">Facebook</span></a>
+                <a href="{{instagram}}" class="contact-icon"><div class="icon-circle"><i class="fab fa-instagram"></i></div><span class="icon-label">Instagram</span></a>
+            </div>
+        </div>
+
+        <!-- Bottom Buttons -->
+        <div class="bottom-buttons">
+            <button class="website-btn" onclick="window.location.href='{{websiteUrl}}'"><i class="fas fa-globe"></i>{{websiteBtnLabel}}</button>
+            <button class="share-btn" onclick="shareCard()"><i class="fas fa-share-nodes"></i>{{shareBtnLabel}}</button>
+        </div>
+
+        <!-- Experience Section -->
+        <div class="experience-section aurora-section">
+            <h2 class="section-title white">{{experienceSectionTitle}}</h2>
+            <div class="video-container"><div class="video-placeholder" onclick="window.location.href='{{videoUrl}}'"><i class="fab fa-youtube"></i></div></div>
+            <div class="experience-text">{{experienceText}}</div>
+            <button class="estimate-btn" onclick="window.location.href='{{ctaBtnUrl}}'"><i class="{{ctaBtnIcon}}"></i>{{ctaBtnLabel}}</button>
+            <div class="certifications">
+                <div class="cert-badge"><i class="{{cert1Icon}}" style="color: #2e7d32;"></i><div>{{cert1Line1}}<br>{{cert1Line2}}</div></div>
+                <div class="cert-badge"><i class="{{cert2Icon}}" style="color: var(--orange);"></i><div>{{cert2Line1}}<br>{{cert2Line2}}</div></div>
+                <div class="cert-badge"><i class="{{cert3Icon}}" style="color: var(--blue-dark);"></i><div>{{cert3Line1}}<br>{{cert3Line2}}</div></div>
+            </div>
+        </div>
+
+        <!-- Testimonials Section -->
+        <div class="testimonials-section">
+            <h2 class="section-title dark">{{testimonialsSectionTitle}}</h2>
+            <div class="video-container"><div class="video-placeholder" onclick="window.location.href='{{testimonialsVideoUrl}}'"><i class="fab fa-youtube"></i></div></div>
+            <button class="review-action-btn" onclick="window.location.href='{{leaveReviewUrl}}'"><i class="fas fa-star"></i>{{leaveReviewBtnLabel}}</button>
+        </div>
+
+        <!-- Showcase Section -->
+        <div class="showcase-section aurora-section">
+            <h2 class="section-title white">{{gallerySectionTitle}}</h2>
+            <div class="gallery">
+                <div class="gallery-item"><img src="{{gallery1Image}}" alt="Work 1"></div>
+                <div class="gallery-item"><img src="{{gallery2Image}}" alt="Work 2"></div>
+                <div class="gallery-item"><img src="{{gallery3Image}}" alt="Work 3"></div>
+                <div class="gallery-item"><img src="{{gallery4Image}}" alt="Work 4"></div>
+                <div class="gallery-item"><img src="{{gallery5Image}}" alt="Work 5"></div>
+                <div class="gallery-item"><img src="{{gallery6Image}}" alt="Work 6"></div>
+                <div class="gallery-item"><img src="{{gallery7Image}}" alt="Work 7"></div>
+                <div class="gallery-item"><img src="{{gallery8Image}}" alt="Work 8"></div>
+                <div class="gallery-item"><img src="{{gallery9Image}}" alt="Work 9"></div>
+                <div class="gallery-item"><img src="{{gallery10Image}}" alt="Work 10"></div>
+                <div class="gallery-item"><img src="{{gallery11Image}}" alt="Work 11"></div>
+                <div class="gallery-item"><img src="{{gallery12Image}}" alt="Work 12"></div>
+            </div>
+            <button class="share-info-btn" onclick="shareCard()"><i class="fas fa-share-nodes"></i>{{shareInfoBtnLabel}}</button>
+            <button class="get-card-btn" onclick="window.location.href='{{getCardUrl}}'">{{getCardBtnLabel}}</button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-badge">
+                <div class="cert-icon"><i class="{{footerBadgeIcon}}"></i></div>
+                <div class="cert-text">
+                    <div class="title">{{footerBadgeTitle}}</div>
+                    <div class="subtitle">{{footerBadgeSubtitle}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        function saveContact() {
+            const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:{{fullName}}
+ORG:{{company}}
+TITLE:{{title}}
+TEL:{{phone}}
+EMAIL:{{email}}
+URL:{{websiteUrl}}
+END:VCARD`;
+            const blob = new Blob([vcard], { type: 'text/vcard' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '{{fullName}}.vcf';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        function shareCard() {
+            if (navigator.share) {
+                navigator.share({ title: '{{fullName}} - {{company}}', text: '{{experienceText}}', url: window.location.href }).catch(err => console.log('Error:', err));

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{fullName}} - {{company}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #1a1a1a;
+            --primary-light: #2d2d2d;
+            --accent: #D97706;
+            --accent-light: #F59E0B;
+            --accent-dark: #B45309;
+            --white: #ffffff;
+            --gray-light: #f5f5f5;
+            --gray: #737373;
+            --text-dark: #1a1a1a;
+        }
+
+        html { overflow-x: hidden; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--primary); color: #fff; min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+        .bg-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .bg-image { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.3) saturate(1.1); }
+        .bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(26, 26, 26, 0.85) 0%, rgba(45, 45, 45, 0.6) 30%, rgba(26, 26, 26, 0.7) 70%, rgba(0, 0, 0, 0.95) 100%); }
+
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+        .particle { position: absolute; background: rgba(217, 119, 6, 0.4); border-radius: 50%; animation: float linear infinite; }
+        .particle:nth-child(1) { left: 10%; width: 4px; height: 4px; animation-duration: 15s; animation-delay: 0s; top: 20%; }
+        .particle:nth-child(2) { left: 20%; width: 6px; height: 6px; animation-duration: 18s; animation-delay: 2s; top: 40%; }
+        .particle:nth-child(3) { left: 30%; width: 3px; height: 3px; animation-duration: 12s; animation-delay: 1s; top: 60%; }
+        .particle:nth-child(4) { left: 40%; width: 5px; height: 5px; animation-duration: 20s; animation-delay: 3s; top: 30%; }
+        .particle:nth-child(5) { left: 50%; width: 4px; height: 4px; animation-duration: 16s; animation-delay: 0.5s; top: 70%; }
+        .particle:nth-child(6) { left: 60%; width: 7px; height: 7px; animation-duration: 14s; animation-delay: 2.5s; top: 25%; }
+        .particle:nth-child(7) { left: 70%; width: 3px; height: 3px; animation-duration: 19s; animation-delay: 1.5s; top: 55%; }
+        .particle:nth-child(8) { left: 80%; width: 5px; height: 5px; animation-duration: 17s; animation-delay: 4s; top: 45%; }
+        .particle:nth-child(9) { left: 90%; width: 4px; height: 4px; animation-duration: 13s; animation-delay: 0.8s; top: 35%; }
+        .particle:nth-child(10) { left: 15%; width: 6px; height: 6px; animation-duration: 21s; animation-delay: 3.5s; top: 80%; }
+        @keyframes float { 0%, 100% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 0.6; } 50% { transform: translateY(-100px) translateX(30px); opacity: 0.4; } 90% { opacity: 0.2; } 100% { transform: translateY(-200px) translateX(-20px); opacity: 0; } }
+
+        .card { position: relative; z-index: 2; max-width: 500px; width: 100%; margin: 0 auto; min-height: 100vh; }
+        .header { padding: 40px 25px 40px; text-align: center; }
+        .top-buttons { display: flex; justify-content: space-between; margin-bottom: 35px; gap: 12px; }
+        .refer-btn, .review-btn { flex: 1; background: var(--accent); color: var(--white); border: none; padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .refer-btn:hover, .review-btn:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(217, 119, 6, 0.4); }
+
+        .profile-image { width: min(140px, 40vw); height: min(140px, 40vw); border-radius: 20px; margin: 0 auto 25px; position: relative; overflow: visible; }
+        .profile-image::before { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 24px; background: linear-gradient(135deg, var(--accent), var(--accent-light), var(--accent)); z-index: -1; }
+        .profile-image::after { content: ''; position: absolute; top: -15px; left: -15px; right: -15px; bottom: -15px; border-radius: 30px; background: radial-gradient(circle, rgba(217, 119, 6, 0.25) 0%, transparent 70%); animation: pulseGlow 3s ease-in-out infinite; z-index: -2; }
+        @keyframes pulseGlow { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+        .profile-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; }
+
+        .name { font-size: 30px; font-weight: 800; color: var(--white); margin-bottom: 8px; letter-spacing: -0.5px; }
+        .title { font-size: 14px; color: var(--accent); margin-bottom: 5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+        .company { font-size: 14px; color: rgba(255, 255, 255, 0.6); margin-bottom: 25px; }
+
+        .main-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+        .book-btn { background: var(--accent); color: var(--white); border: none; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .book-btn:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(217, 119, 6, 0.4); }
+        .save-btn { background: var(--white); color: var(--text-dark); border: none; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .save-btn:hover { background: var(--gray-light); transform: translateY(-2px); }
+
+        .contact-section { background: var(--white); padding: 35px 25px; margin-top: 30px; border-radius: 25px 25px 0 0; }
+        .contact-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .contact-row:last-child { margin-bottom: 0; }
+        .contact-icon { display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; transition: transform 0.3s ease; }
+        .contact-icon:hover { transform: translateY(-3px); }
+        .icon-circle { width: 55px; height: 55px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 20px; transition: all 0.3s ease; }
+        .contact-icon:hover .icon-circle { box-shadow: 0 5px 20px rgba(26, 26, 26, 0.3); transform: scale(1.05); }
+        .icon-circle.accent { background: var(--accent); }
+        .icon-label { font-size: 11px; font-weight: 600; color: var(--text-dark); }
+
+        .bottom-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 0 25px 25px; background: var(--white); }
+        .website-btn { background: var(--primary); color: var(--white); border: none; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .website-btn:hover { background: var(--primary-light); transform: translateY(-2px); }
+        .share-btn { background: var(--gray-light); color: var(--text-dark); border: 2px solid #e0e0e0; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; min-width: 0; overflow: hidden; }
+        .share-btn:hover { background: #e8e8e8; transform: translateY(-2px); }
+
+        .section-title { font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 25px; letter-spacing: -0.5px; }
+        .section-title.white { color: var(--white); }
+        .section-title.dark { color: var(--text-dark); }
+
+        .services-section { padding: 40px 25px; background: var(--white); overflow: hidden; }
+        .services-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .service-card { background: var(--gray-light); border-radius: 16px; padding: 20px 12px; text-align: center; transition: all 0.3s ease; cursor: pointer; overflow: hidden; min-width: 0; }
+        .service-card:hover { background: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(26, 26, 26, 0.15); }
+        .service-card i { font-size: 28px; color: var(--accent); margin-bottom: 10px; display: block; }
+        .service-card span { font-size: 11px; font-weight: 700; line-height: 1.4; display: block; color: var(--text-dark); overflow: hidden; text-overflow: ellipsis; word-break: break-word; }
+        .service-card:hover span { color: var(--white); }
+
+        .experience-section { padding: 50px 25px; position: relative; }
+        .video-container { margin-bottom: 25px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
+        .video-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, rgba(45, 45, 45, 0.95) 0%, rgba(26, 26, 26, 0.98) 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .video-placeholder i { font-size: 50px; color: #ff0000; background: rgba(255, 255, 255, 0.95); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .video-placeholder:hover i { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 255, 255, 0.5); }
+
+        .features-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
+        .feature-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(217, 119, 6, 0.2); border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 12px; }
+        .feature-card i { font-size: 22px; color: var(--accent); }
+        .feature-card span { font-size: 12px; font-weight: 700; color: var(--white); line-height: 1.3; }
+
+        .estimate-btn { width: 100%; background: var(--accent); color: var(--white); border: none; padding: 18px; border-radius: 30px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; margin-bottom: 30px; box-shadow: 0 5px 25px rgba(217, 119, 6, 0.4); }
+        .estimate-btn:hover { background: var(--accent-dark); transform: translateY(-3px); box-shadow: 0 8px 35px rgba(217, 119, 6, 0.5); }
+
+        .certifications { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .cert-badge { background: var(--white); border-radius: 14px; padding: 18px 22px; text-align: center; transition: all 0.3s ease; }
+        .cert-badge:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); }
+        .cert-badge i { display: block; margin-bottom: 10px; font-size: 28px; }
+        .cert-badge div { font-size: 11px; font-weight: 800; line-height: 1.4; color: var(--text-dark); }
+
+        .testimonials-section { padding: 50px 25px; background: var(--white); overflow: hidden; }
+        .testimonials-marquee { position: relative; width: 100%; overflow: hidden; margin-bottom: 25px; }
+        .testimonials-marquee::before, .testimonials-marquee::after { content: ''; position: absolute; top: 0; width: 50px; height: 100%; z-index: 2; pointer-events: none; }
+        .testimonials-marquee::before { left: 0; background: linear-gradient(to right, var(--white), transparent); }
+        .testimonials-marquee::after { right: 0; background: linear-gradient(to left, var(--white), transparent); }
+        .testimonials-track { display: flex; gap: 20px; animation: scrollMarquee 35s linear infinite; width: max-content; }
+        .testimonials-track:hover { animation-play-state: paused; }
+        @keyframes scrollMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .testimonial-card { background: var(--gray-light); border-radius: 16px; padding: 25px; min-width: min(300px, 85vw); max-width: min(300px, 85vw); flex-shrink: 0; }
+        .testimonial-stars { color: var(--accent); font-size: 14px; margin-bottom: 12px; }
+        .testimonial-text { font-size: 13px; color: var(--text-dark); line-height: 1.6; margin-bottom: 15px; font-style: italic; }
+        .testimonial-author { font-size: 12px; font-weight: 700; color: var(--text-dark); }
+
+        .review-action-btn { width: 100%; background: var(--primary); color: var(--white); border: none; padding: 16px; border-radius: 30px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; }
+        .review-action-btn:hover { background: var(--primary-light); transform: translateY(-2px); }
+
+        .showcase-section { padding: 50px 25px; position: relative; }
+        .gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 30px; }
+        .gallery-item { aspect-ratio: 1; border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
+        .gallery-item:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); z-index: 2; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .gallery-item:hover img { transform: scale(1.1); }
+
+        .share-info-btn { width: 100%; background: var(--accent); color: var(--white); border: none; padding: 18px; border-radius: 30px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .share-info-btn:hover { background: var(--accent-dark); transform: translateY(-2px); }
+        .get-card-btn { width: 100%; background: transparent; color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); padding: 16px; border-radius: 30px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; }
+        .get-card-btn:hover { background: rgba(255, 255, 255, 0.05); }
+
+        .footer { padding: 35px 25px; background: var(--primary); text-align: center; border-top: 1px solid rgba(217, 119, 6, 0.3); }
+        .footer-logo { font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+        .footer-tagline { font-size: 13px; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px; }
+        .footer-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.05); padding: 10px 16px; border-radius: 8px; font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+        .footer-badge i { color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .name { font-size: 28px; }
+            .section-title { font-size: 22px; }
+            .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .features-row { grid-template-columns: 1fr; }
+            .icon-circle { width: 52px; height: 52px; font-size: 19px; }
+            .top-buttons { flex-direction: column; }
+            .bottom-buttons { grid-template-columns: 1fr; }
+            .main-buttons { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) { .top-buttons { flex-direction: column; } .name { font-size: 26px; } .icon-circle { width: 50px; height: 50px; font-size: 18px; } .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .features-row { grid-template-columns: 1fr; } .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    </style>
+</head>
+<body>
+    <div class="bg-container">
+        <img src="{{backgroundImage}}" class="bg-image" alt="Background">
+        <div class="bg-overlay"></div>
+    </div>
+
+    <div class="particles">
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    </div>
+
+    <div class="card">
+        <div class="header">
+            <div class="top-buttons">
+                <button class="refer-btn" onclick="window.location.href='{{referBtnUrl}}'"><i class="{{referBtnIcon}}"></i>{{referBtnLabel}}</button>
+                <button class="review-btn" onclick="window.location.href='{{reviewBtnUrl}}'"><i class="{{reviewBtnIcon}}"></i>{{reviewBtnLabel}}</button>
+            </div>
+
+            <div class="profile-image"><img src="{{profileImage}}" alt="{{fullName}}"></div>
+            <h1 class="name">{{fullName}}</h1>
+            <div class="title">{{title}}</div>
+            <div class="company">{{company}}</div>
+
+            <div class="main-buttons">
+                <button class="book-btn" onclick="window.location.href='{{quoteBtnUrl}}'"><i class="fas fa-calendar-check"></i>{{quoteBtnLabel}}</button>
+                <button class="save-btn" onclick="saveContact()"><i class="fas fa-address-card"></i>{{saveContactBtnLabel}}</button>
+            </div>
+        </div>
+
+        <div class="contact-section">
+            <div class="contact-row">
+                <a href="tel:{{phone}}" class="contact-icon"><div class="icon-circle"><i class="fas fa-phone"></i></div><span class="icon-label">Call</span></a>
+                <a href="mailto:{{email}}" class="contact-icon"><div class="icon-circle"><i class="fas fa-envelope"></i></div><span class="icon-label">Email</span></a>
+                <a href="sms:{{phone}}" class="contact-icon"><div class="icon-circle"><i class="fas fa-comment-dots"></i></div><span class="icon-label">Text</span></a>
+                <a href="https://wa.me/{{whatsapp}}" class="contact-icon"><div class="icon-circle accent"><i class="fab fa-whatsapp"></i></div><span class="icon-label">WhatsApp</span></a>
+            </div>
+            <div class="contact-row">
+                <a href="{{linkedin}}" class="contact-icon"><div class="icon-circle"><i class="fab fa-linkedin-in"></i></div><span class="icon-label">LinkedIn</span></a>
+                <a href="{{websiteUrl}}" class="contact-icon"><div class="icon-circle"><i class="fas fa-globe"></i></div><span class="icon-label">Website</span></a>
+                <a href="{{facebook}}" class="contact-icon"><div class="icon-circle"><i class="fab fa-facebook-f"></i></div><span class="icon-label">Facebook</span></a>
+                <a href="{{instagram}}" class="contact-icon"><div class="icon-circle"><i class="fab fa-instagram"></i></div><span class="icon-label">Instagram</span></a>
+            </div>
+        </div>
+
+        <div class="bottom-buttons">
+            <button class="website-btn" onclick="window.location.href='{{websiteUrl}}'"><i class="fas fa-globe"></i>{{websiteBtnLabel}}</button>
+            <button class="share-btn" onclick="shareCard()"><i class="fas fa-share-nodes"></i>{{shareBtnLabel}}</button>
+        </div>
+
+        <div class="services-section">
+            <h2 class="section-title dark">{{servicesSectionTitle}}</h2>
+            <div class="services-grid">
+                <div class="service-card"><i class="fas fa-utensils"></i><span>{{service1Name}}</span></div>
+                <div class="service-card"><i class="fas fa-bath"></i><span>{{service2Name}}</span></div>
+                <div class="service-card"><i class="fas fa-home"></i><span>{{service3Name}}</span></div>
+                <div class="service-card"><i class="fas fa-hammer"></i><span>{{service4Name}}</span></div>
+                <div class="service-card"><i class="fas fa-layer-group"></i><span>{{service5Name}}</span></div>
+                <div class="service-card"><i class="fas fa-paint-roller"></i><span>{{service6Name}}</span></div>
+                <div class="service-card"><i class="fas fa-door-open"></i><span>{{service7Name}}</span></div>
+                <div class="service-card"><i class="fas fa-warehouse"></i><span>{{service8Name}}</span></div>
+                <div class="service-card"><i class="fas fa-tree"></i><span>{{service9Name}}</span></div>
+            </div>
+        </div>
+
+        <div class="experience-section">
+            <h2 class="section-title white">{{experienceSectionTitle}}</h2>
+            <div class="video-container"><div class="video-placeholder" onclick="window.location.href='{{videoUrl}}'"><i class="fab fa-youtube"></i></div></div>
+            <div class="features-row">
+                <div class="feature-card"><i class="{{feature1Icon}}"></i><span>{{feature1Text}}</span></div>
+                <div class="feature-card"><i class="{{feature2Icon}}"></i><span>{{feature2Text}}</span></div>
+                <div class="feature-card"><i class="{{feature3Icon}}"></i><span>{{feature3Text}}</span></div>
+                <div class="feature-card"><i class="{{feature4Icon}}"></i><span>{{feature4Text}}</span></div>
+            </div>
+            <button class="estimate-btn" onclick="window.location.href='{{ctaBtnUrl}}'"><i class="{{ctaBtnIcon}}"></i>{{ctaBtnLabel}}</button>
+            <div class="certifications">
+                <div class="cert-badge"><i class="{{cert1Icon}}" style="color: var(--accent);"></i><div>{{cert1Line1}}<br>{{cert1Line2}}</div></div>
+                <div class="cert-badge"><i class="{{cert2Icon}}" style="color: #16a34a;"></i><div>{{cert2Line1}}<br>{{cert2Line2}}</div></div>
+                <div class="cert-badge"><i class="{{cert3Icon}}" style="color: var(--primary);"></i><div>{{cert3Line1}}<br>{{cert3Line2}}</div></div>
+            </div>
+        </div>
+
+        <div class="testimonials-section">
+            <h2 class="section-title dark">{{testimonialsSectionTitle}}</h2>
+            <div class="testimonials-marquee">
+                <div class="testimonials-track">
+                    <div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><div class="testimonial-text">"{{testimonial1Text}}"</div><div class="testimonial-author">— {{testimonial1Author}}</div></div>
+                    <div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><div class="testimonial-text">"{{testimonial2Text}}"</div><div class="testimonial-author">— {{testimonial2Author}}</div></div>
+                    <div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><div class="testimonial-text">"{{testimonial3Text}}"</div><div class="testimonial-author">— {{testimonial3Author}}</div></div>
+                    <div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><div class="testimonial-text">"{{testimonial4Text}}"</div><div class="testimonial-author">— {{testimonial4Author}}</div></div>
+                    <div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><div class="testimonial-text">"{{testimonial1Text}}"</div><div class="testimonial-author">— {{testimonial1Author}}</div></div>
+                    <div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><div class="testimonial-text">"{{testimonial2Text}}"</div><div class="testimonial-author">— {{testimonial2Author}}</div></div>
+                    <div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><div class="testimonial-text">"{{testimonial3Text}}"</div><div class="testimonial-author">— {{testimonial3Author}}</div></div>
+                    <div class="testimonial-card"><div class="testimonial-stars">★★★★★</div><div class="testimonial-text">"{{testimonial4Text}}"</div><div class="testimonial-author">— {{testimonial4Author}}</div></div>
+                </div>
+            </div>
+            <button class="review-action-btn" onclick="window.location.href='{{leaveReviewUrl}}'"><i class="fas fa-star"></i>{{leaveReviewBtnLabel}}</button>
+        </div>
+
+        <div class="showcase-section">
+            <h2 class="section-title white">{{gallerySectionTitle}}</h2>
+            <div class="gallery">
+                <div class="gallery-item"><img src="{{gallery1Image}}" alt="Project 1"></div>
+                <div class="gallery-item"><img src="{{gallery2Image}}" alt="Project 2"></div>
+                <div class="gallery-item"><img src="{{gallery3Image}}" alt="Project 3"></div>
+                <div class="gallery-item"><img src="{{gallery4Image}}" alt="Project 4"></div>
+                <div class="gallery-item"><img src="{{gallery5Image}}" alt="Project 5"></div>
+                <div class="gallery-item"><img src="{{gallery6Image}}" alt="Project 6"></div>
+                <div class="gallery-item"><img src="{{gallery7Image}}" alt="Project 7"></div>
+                <div class="gallery-item"><img src="{{gallery8Image}}" alt="Project 8"></div>
+            </div>
+            <button class="share-info-btn" onclick="shareCard()"><i class="fas fa-share-nodes"></i>{{shareInfoBtnLabel}}</button>
+            <button class="get-card-btn" onclick="window.location.href='{{getCardUrl}}'">{{getCardBtnLabel}}</button>
+        </div>
+
+        <div class="footer">
+            <div class="footer-logo">{{company}}</div>
+            <div class="footer-tagline">{{footerTagline}}</div>
+            <div class="footer-badge"><i class="fas fa-check-circle"></i>{{footerBadge}}</div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        function saveContact() {
+            const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:{{fullName}}
+ORG:{{company}}
+TITLE:{{title}}
+TEL:{{phone}}
+EMAIL:{{email}}
+URL:{{websiteUrl}}
+END:VCARD`;
+            const blob = new Blob([vcard], { type: 'text/vcard' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '{{fullName}}.vcf';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        function shareCard() {
+            if (navigator.share) {
+                navigator.share({ title: '{{fullName}} - {{company}}', text: '{{footerTagline}}', url: window.location.href }).catch(err => console.log('Error:', err));

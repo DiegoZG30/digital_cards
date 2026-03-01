@@ -12,9 +12,13 @@
  */
 
 import { readFileSync } from "fs";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 import pg from "pg";
 import bcrypt from "bcryptjs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const { Client } = pg;
 
@@ -26,35 +30,35 @@ const TEMPLATES = [
     sector: "restaurant",
     description:
       "Tarjeta digital elegante para restaurantes con paleta dorada, secciones de menu, galeria y reservas.",
-    file: "/home/diego/ADVANCED MARKETING/HECTOR/01-restaurant-TEMPLATE.html",
+    file: resolve(__dirname, "templates/01-restaurant-TEMPLATE.html"),
   },
   {
     name: "Real Estate v1",
     sector: "real-estate",
     description:
       "Tarjeta digital profesional para agentes inmobiliarios con listados de propiedades, CTA de contacto y galeria.",
-    file: "/home/diego/ADVANCED MARKETING/HECTOR/02-realtor-TEMPLATE.html",
+    file: resolve(__dirname, "templates/02-realtor-TEMPLATE.html"),
   },
   {
     name: "Construccion v1",
     sector: "construction",
     description:
       "Tarjeta digital para empresas de construccion con portafolio de proyectos, certificaciones y servicios.",
-    file: "/home/diego/ADVANCED MARKETING/HECTOR/03-construction-TEMPLATE.html",
+    file: resolve(__dirname, "templates/03-construction-TEMPLATE.html"),
   },
   {
     name: "Limpieza",
     sector: "cleaning",
     description:
       "Tarjeta digital para servicios de limpieza profesional con listado de servicios, testimonios y cotizaciones.",
-    file: "/home/diego/ADVANCED MARKETING/HECTOR/04-alldry-TEMPLATE.html",
+    file: resolve(__dirname, "templates/04-alldry-TEMPLATE.html"),
   },
   {
     name: "PLANTILLA V1",
     sector: "general",
     description:
       "Plantilla general multiproposito adaptable a cualquier sector con diseno moderno azul profesional.",
-    file: "/home/diego/ADVANCED MARKETING/HECTOR/05-general-TEMPLATE.html",
+    file: resolve(__dirname, "templates/05-general-TEMPLATE.html"),
   },
 ];
 

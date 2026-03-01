@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{fullName}} - Digital Business Card</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --terracotta: #C45C26;
+            --terracotta-dark: #A34820;
+            --terracotta-light: #E07A45;
+            --cream: #FDF8F3;
+            --olive: #5C6B4A;
+            --olive-light: #7A8B68;
+            --charcoal: #2D2D2D;
+            --warm-gray: #8B8178;
+            --white: #ffffff;
+            --beige: #F5EDE4;
+        }
+
+        html { overflow-x: hidden; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--charcoal);
+            color: #fff;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* Full Screen Background */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .bg-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.35) saturate(1.1) sepia(0.1);
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                180deg,
+                rgba(45, 45, 45, 0.85) 0%,
+                rgba(92, 75, 58, 0.4) 30%,
+                rgba(45, 45, 45, 0.6) 70%,
+                rgba(0, 0, 0, 0.95) 100%
+            );
+        }
+
+        /* Animated Warm Lights */
+        .lights {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .light {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: glow 8s ease-in-out infinite;
+        }
+
+        .light:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(196, 92, 38, 0.15) 0%, transparent 70%);
+            top: 10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+
+        .light:nth-child(2) {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(92, 107, 74, 0.12) 0%, transparent 70%);
+            top: 40%;
+            right: -5%;
+            animation-delay: 2s;
+        }
+
+        .light:nth-child(3) {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(196, 92, 38, 0.1) 0%, transparent 70%);
+            bottom: 10%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Main Card Container */
+        .card {
+            position: relative;
+            z-index: 2;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* Header Section */
+        .header {
+            padding: 40px 25px 40px;
+            text-align: center;
+        }
+
+        .top-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 35px;
+            gap: 12px;
+        }
+
+        .refer-btn, .review-btn {
+            flex: 1;
+            background: var(--terracotta);
+            color: var(--white);
+            border: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .refer-btn:hover, .review-btn:hover {
+            background: var(--terracotta-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(196, 92, 38, 0.4);
+        }
+
+        /* Profile Image */
+        .profile-image {
+            width: min(150px, 40vw);
+            height: min(150px, 40vw);
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+
+        .profile-image::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--terracotta), var(--olive), var(--terracotta-light), var(--terracotta));
+            animation: rotateRing 12s linear infinite;
+        }
+
+        .profile-image::after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196, 92, 38, 0.2) 0%, transparent 70%);
+            animation: pulseGlow 3s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotateRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--charcoal);
+            position: relative;
+            z-index: 1;
+        }
+
+        .name {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .title {
+            font-size: 14px;
+            color: var(--terracotta-light);
+            margin-bottom: 5px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .company {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+        }
+
+        .license {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 25px;
+        }
+
+        /* Main Buttons */
+        .main-buttons {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 12px;
+        }
+
+        .book-btn {
+            background: var(--terracotta);
+            color: var(--white);
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .book-btn:hover {
+            background: var(--terracotta-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(196, 92, 38, 0.4);
+        }
+
+        .save-btn {
+            background: var(--white);
+            color: var(--charcoal);
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .save-btn:hover {
+            background: var(--cream);
+            transform: translateY(-2px);
+        }
+
+        /* Contact Icons Section */
+        .contact-section {
+            background: var(--cream);
+            padding: 35px 25px;
+            margin-top: 30px;
+            border-radius: 30px 30px 0 0;
+        }
+
+        .contact-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .contact-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-icon:hover {
+            transform: translateY(-3px);
+        }
+
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--charcoal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 22px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-icon:hover .icon-circle {
+            box-shadow: 0 5px 20px rgba(45, 45, 45, 0.3);
+            transform: scale(1.05);
+        }
+
+        .icon-circle.terracotta {
+            background: var(--terracotta);
+        }
+
+        .icon-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--charcoal);
+        }
+
+        /* Bottom Buttons */
+        .bottom-buttons {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 12px;
+            padding: 0 25px 25px;
+            background: var(--cream);
+        }
+
+        .website-btn {
+            background: var(--charcoal);
+            color: var(--white);
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .website-btn:hover {
+            background: #3d3d3d;
+            transform: translateY(-2px);
+        }
+
+        .share-btn {
+            background: var(--beige);
+            color: var(--charcoal);
+            border: 2px solid #e0d5c9;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .share-btn:hover {
+            background: #e8ddd0;
+            transform: translateY(-2px);
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 24px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 25px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title.white { color: var(--white); }
+        .section-title.dark { color: var(--charcoal); }
+
+        /* Services Section - For Buyers & Sellers */
+        .services-section {
+            padding: 40px 25px;
+            background: var(--cream);
+            overflow: hidden;
+        }
+
+        .services-category {
+            margin-bottom: 30px;
+        }
+
+        .services-category:last-child {
+            margin-bottom: 0;
+        }
+
+        .category-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--terracotta);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-title::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(to right, var(--terracotta), transparent);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .service-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .service-card:hover {
+            background: var(--charcoal);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(45, 45, 45, 0.15);
+        }
+
+        .service-card i {
+            font-size: 26px;
+            color: var(--terracotta);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .service-card span {
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.4;
+            display: block;
+            color: var(--charcoal);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+        }
+
+        .service-card:hover span {
+            color: var(--white);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 40px 25px;
+            background: var(--beige);
+            overflow: hidden;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 25px 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--terracotta);
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--warm-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Experience Section */
+        .experience-section {
+            padding: 50px 25px;
+            position: relative;
+        }
+
+        .video-container {
+            margin-bottom: 25px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(60, 60, 60, 0.95) 0%, rgba(45, 45, 45, 0.98) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-placeholder i {
+            font-size: 50px;
+            color: #ff0000;
+            background: rgba(255, 255, 255, 0.95);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .video-placeholder:hover i {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Features Row */
+        .features-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(196, 92, 38, 0.2);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-card i {
+            font-size: 22px;
+            color: var(--terracotta-light);
+        }
+
+        .feature-card span {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--white);
+            line-height: 1.3;
+        }
+
+        .estimate-btn {
+            width: 100%;
+            background: var(--terracotta);
+            color: var(--white);
+            border: none;
+            padding: 18px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 25px rgba(196, 92, 38, 0.4);
+        }
+
+        .estimate-btn:hover {
+            background: var(--terracotta-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 35px rgba(196, 92, 38, 0.5);
+        }
+
+        /* Certifications */
+        .certifications {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .cert-badge {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 18px 22px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .cert-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .cert-badge i {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .cert-badge div {
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: var(--charcoal);
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 50px 25px;
+            background: var(--cream);
+            overflow: hidden;
+        }
+
+        .testimonials-marquee {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .testimonials-marquee::before,
+        .testimonials-marquee::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 50px;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .testimonials-marquee::before {
+            left: 0;
+            background: linear-gradient(to right, var(--cream), transparent);
+        }
+
+        .testimonials-marquee::after {
+            right: 0;
+            background: linear-gradient(to left, var(--cream), transparent);
+        }
+
+        .testimonials-track {
+            display: flex;
+            gap: 20px;
+            animation: scrollMarquee 25s linear infinite;
+            width: max-content;
+        }
+
+        .testimonials-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .testimonial-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 25px;
+            min-width: min(300px, 85vw);
+            max-width: min(300px, 85vw);
+            flex-shrink: 0;
+            border: 1px solid #e8ddd0;
+        }
+
+        .testimonial-stars {
+            color: var(--terracotta);
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-text {
+            font-size: 14px;
+            color: var(--charcoal);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .review-action-btn {
+            width: 100%;
+            background: var(--terracotta);
+            color: var(--white);
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .review-action-btn:hover {
+            background: var(--terracotta-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Listings Section */
+        .showcase-section {
+            padding: 50px 25px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 4/3;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 3px solid rgba(196, 92, 38, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+            border-color: var(--terracotta);
+            box-shadow: 0 8px 30px rgba(196, 92, 38, 0.3);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .price-tag {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(45, 45, 45, 0.95);
+            color: var(--terracotta-light);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .share-info-btn {
+            width: 100%;
+            background: var(--white);
+            color: var(--charcoal);
+            border: none;
+            padding: 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .share-info-btn:hover {
+            background: var(--cream);
+            transform: translateY(-2px);
+        }
+
+        .get-card-btn {
+            width: 100%;
+            background: transparent;
+            color: var(--white);
+            border: 2px solid rgba(196, 92, 38, 0.5);
+            padding: 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .get-card-btn:hover {
+            background: rgba(196, 92, 38, 0.1);
+            border-color: var(--terracotta);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--cream);
+            padding: 30px 25px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--charcoal);
+            margin-bottom: 5px;
+        }
+
+        .footer-company {
+            font-size: 13px;
+            color: var(--terracotta);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .footer-tagline {
+            font-size: 12px;
+            color: var(--warm-gray);
+            margin-bottom: 15px;
+        }
+
+        .footer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--beige);
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 12px;
+            color: var(--charcoal);
+            font-weight: 600;
+        }
+
+        .footer-badge i {
+            color: var(--olive);
+        }
+
+        /* Languages Badge */
+        .languages-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .languages-badge i {
+            color: var(--terracotta-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .name { font-size: 28px; }
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .contact-row { gap: 12px; }
+            .icon-circle { width: 55px; height: 55px; font-size: 20px; }
+            .top-buttons { flex-direction: column; }
+            .bottom-buttons { grid-template-columns: 1fr; }
+            .main-buttons { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .top-buttons { flex-direction: column; }
+            .name { font-size: 28px; }
+            .contact-row { gap: 10px; }
+            .icon-circle { width: 50px; height: 50px; font-size: 18px; }
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: 1fr; }
+            .features-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-container">
+        <img src="{{backgroundImage}}" class="bg-image" alt="Home Background">
+        <div class="bg-overlay"></div>
+    </div>
+
+    <!-- Animated Lights -->
+    <div class="lights">
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+        <!-- Header -->
+        <div class="header">
+            <div class="top-buttons">
+                <button class="refer-btn" onclick="window.location.href='{{referBtnUrl}}'">
+                    <i class="{{referBtnIcon}}"></i>
+                    {{referBtnLabel}}
+                </button>
+                <button class="review-btn" onclick="window.location.href='{{reviewBtnUrl}}'">
+                    <i class="{{reviewBtnIcon}}"></i>
+                    {{reviewBtnLabel}}
+                </button>
+            </div>
+
+            <div class="profile-image">
+                <img src="{{profileImage}}" alt="{{fullName}}">
+            </div>
+
+            <h1 class="name">{{fullName}}</h1>
+            <div class="title">{{title}}</div>
+            <div class="company">{{company}}</div>
+            
+            <div class="languages-badge">
+                <i class="fas fa-language"></i>
+                {{languagesBadge}}
+            </div>
+
+            <div class="main-buttons">
+                <button class="book-btn" onclick="window.location.href='{{scheduleBtnUrl}}'">
+                    <i class="fas fa-calendar-check"></i>
+                    {{bookBtnLabel}}
+                </button>
+                <button class="save-btn" onclick="saveContact()">
+                    <i class="fas fa-address-card"></i>
+                    {{saveContactBtnLabel}}
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact Icons -->
+        <div class="contact-section">
+            <div class="contact-row">
+                <a href="tel:{{phone}}" class="contact-icon">
+                    <div class="icon-circle">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <span class="icon-label">Call</span>
+                </a>
+                <a href="mailto:{{email}}" class="contact-icon">
+                    <div class="icon-circle">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <span class="icon-label">Email</span>
+                </a>
+                <a href="sms:{{phone}}" class="contact-icon">
+                    <div class="icon-circle">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <span class="icon-label">Text</span>
+                </a>
+                <a href="https://wa.me/{{whatsapp}}" class="contact-icon">
+                    <div class="icon-circle terracotta">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <span class="icon-label">WhatsApp</span>
+                </a>
+            </div>
+
+            <div class="contact-row">
+                <a href="https://linkedin.com" target="_blank" class="contact-icon">
+                    <div class="icon-circle">
+                        <i class="fab fa-linkedin-in"></i>
+                    </div>
+                    <span class="icon-label">LinkedIn</span>
+                </a>
+                <a href="#" target="_blank" class="contact-icon">
+                    <div class="icon-circle">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <span class="icon-label">Website</span>
+                </a>
+                <a href="https://instagram.com" target="_blank" class="contact-icon">
+                    <div class="icon-circle">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <span class="icon-label">Instagram</span>
+                </a>
+                <a href="https://facebook.com" target="_blank" class="contact-icon">
+                    <div class="icon-circle">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                    <span class="icon-label">Facebook</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bottom Buttons -->
+        <div class="bottom-buttons">
+            <button class="website-btn" onclick="window.location.href='{{websiteUrl}}'">
+                <i class="fas fa-globe"></i>
+                {{websiteBtnLabel}}
+            </button>
+            <button class="share-btn" onclick="shareCard()">
+                <i class="fas fa-share-nodes"></i>
+                {{shareBtnLabel}}
+            </button>
+        </div>
+
+        <!-- Services Section -->
+        <div class="services-section">
+            <h2 class="section-title dark">{{servicesSectionTitle}}</h2>
+            
+            <div class="services-category">
+                <div class="category-title">{{buyerCategoryTitle}}</div>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <i class="fas fa-magnifying-glass-location"></i>
+                        <span>{{buyerService1Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-car"></i>
+                        <span>{{buyerService2Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-handshake-simple"></i>
+                        <span>{{buyerService3Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-file-signature"></i>
+                        <span>{{buyerService4Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-building-columns"></i>
+                        <span>{{buyerService5Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-key"></i>
+                        <span>{{buyerService6Name}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="services-category">
+                <div class="category-title">{{sellerCategoryTitle}}</div>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <i class="fas fa-chart-line"></i>
+                        <span>{{sellerService1Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-camera"></i>
+                        <span>{{sellerService2Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>{{sellerService3Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-door-open"></i>
+                        <span>{{sellerService4Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-comments-dollar"></i>
+                        <span>{{sellerService5Name}}</span>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-file-contract"></i>
+                        <span>{{sellerService6Name}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{stat1Value}}</div>
+                    <div class="stat-label">{{stat1Label}}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{stat2Value}}</div>
+                    <div class="stat-label">{{stat2Label}}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{stat3Value}}</div>
+                    <div class="stat-label">{{stat3Label}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Experience Section -->
+        <div class="experience-section">
+            <h2 class="section-title white">{{experienceSectionTitle}}</h2>
+            
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <i class="fab fa-youtube"></i>
+                </div>
+            </div>
+
+            <div class="features-row">
+                <div class="feature-card">
+                    <i class="fas fa-language"></i>
+                    <span>{{feature1Text}}</span>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-clock"></i>
+                    <span>{{feature2Text}}</span>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-map-location-dot"></i>
+                    <span>{{feature3Text}}</span>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-people-group"></i>
+                    <span>{{feature4Text}}</span>
+                </div>
+            </div>
+
+            <button class="estimate-btn" onclick="window.location.href='{{ctaBtnUrl}}'">
+                <i class="fas fa-home"></i>
+                {{ctaBtnLabel}}
+            </button>
+
+            <div class="certifications">
+                <div class="cert-badge">
+                    <i class="{{cert1Icon}}" style="color: #C45C26;"></i>
+                    <div>{{cert1Line1}}<br>{{cert1Line2}}</div>
+                </div>
+                <div class="cert-badge">
+                    <i class="{{cert2Icon}}" style="color: #5C6B4A;"></i>
+                    <div>{{cert2Line1}}<br>{{cert2Line2}}</div>
+                </div>
+                <div class="cert-badge">
+                    <i class="{{cert3Icon}}" style="color: #C45C26;"></i>
+                    <div>{{cert3Line1}}<br>{{cert3Line2}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testimonials Section -->
+        <div class="testimonials-section">
+            <h2 class="section-title dark">{{testimonialsSectionTitle}}</h2>
+            
+            <div class="testimonials-marquee">
+                <div class="testimonials-track">
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial1Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial1Author}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial2Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial2Author}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial3Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial3Author}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial4Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial4Author}}</div>
+                    </div>
+                    <!-- Duplicates for infinite scroll -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial1Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial1Author}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial2Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial2Author}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial3Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial3Author}}</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <div class="testimonial-text">"{{testimonial4Text}}"</div>
+                        <div class="testimonial-author">— {{testimonial4Author}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="review-action-btn" onclick="window.location.href='{{leaveReviewUrl}}'">
+                <i class="fas fa-star"></i>
+                {{leaveReviewBtnLabel}}
+            </button>
+        </div>
+
+        <!-- Listings Section -->
+        <div class="showcase-section">
+            <h2 class="section-title white">{{gallerySectionTitle}}</h2>
+            
+            <div class="gallery">
+                <div class="gallery-item">
+                    <img src="{{listing1Image}}" alt="Home 1">
+                    <div class="price-tag">{{listing1Price}}</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="{{listing2Image}}" alt="Home 2">
+                    <div class="price-tag">{{listing2Price}}</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="{{listing3Image}}" alt="Home 3">
+                    <div class="price-tag">{{listing3Price}}</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="{{listing4Image}}" alt="Home 4">
+                    <div class="price-tag">{{listing4Price}}</div>
+                </div>
+            </div>
+
+            <button class="share-info-btn" onclick="shareCard()">
+                <i class="fas fa-share-nodes"></i>
+                {{shareInfoBtnLabel}}
+            </button>
+
+            <button class="get-card-btn" onclick="window.location.href='{{getCardUrl}}'">
+                {{getCardBtnLabel}}
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-logo">{{fullName}}</div>
+            <div class="footer-company">{{company}}</div>
+            <div class="footer-tagline">{{footerTagline}}</div>
+            <div class="footer-badge">
+                <i class="fas fa-shield-halved"></i>
+                {{footerBadge}}
+            </div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        function saveContact() {
+            const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:{{fullName}}
+ORG:{{company}}
+TITLE:{{title}}
+TEL:{{phone}}
+EMAIL:{{email}}
+URL:{{websiteUrl}}
+NOTE:{{languagesBadge}}
+END:VCARD`;
+
+            const blob = new Blob([vcard], { type: 'text/vcard' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '{{fullName}}.vcf';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function shareCard() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{fullName}} - {{title}}',
+                    text: '{{footerTagline}}',
+                    url: window.location.href
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                naviga
