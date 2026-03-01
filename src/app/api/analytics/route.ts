@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { profiles, analyticsEvents } from "@/lib/db/schema";
 import { requireAuth } from "@/lib/auth/session";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, and, gte } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -21,53 +21,107 @@ export async function GET() {
       );
     }
 
-    // Get recent events for this profile
-    const events = await db
-      .select()
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Total views (all time)
+    const [totalViewsResult] = await db
+      .select({ count: sql<number>`COUNT(*)`.as("count") })
       .from(analyticsEvents)
-      .where(eq(analyticsEvents.profileId, profile.id))
-      .orderBy(desc(analyticsEvents.createdAt))
-      .limit(1000);
+      .where(
+        and(
+          eq(analyticsEvents.profileId, profile.id),
+          eq(analyticsEvents.eventType, "view")
+        )
+      );
+    const totalViews = totalViewsResult?.count || 0;
 
-    // Aggregate stats
-    const totalViews = events.filter((e) => e.eventType === "view").length;
-    const totalClicks = events.filter((e) => e.eventType === "click").length;
+    // Monthly views (last 30 days)
+    const [monthlyViewsResult] = await db
+      .select({ count: sql<number>`COUNT(*)`.as("count") })
+      .from(analyticsEvents)
+      .where(
+        and(
+          eq(analyticsEvents.profileId, profile.id),
+          eq(analyticsEvents.eventType, "view"),
+          gte(analyticsEvents.createdAt, thirtyDaysAgo)
+        )
+      );
+    const monthlyViews = monthlyViewsResult?.count || 0;
 
-    // Group by day for chart data
-    const dailyStats = await db
+    // Monthly clicks (last 30 days)
+    const [monthlyClicksResult] = await db
+      .select({ count: sql<number>`COUNT(*)`.as("count") })
+      .from(analyticsEvents)
+      .where(
+        and(
+          eq(analyticsEvents.profileId, profile.id),
+          eq(analyticsEvents.eventType, "click"),
+          gte(analyticsEvents.createdAt, thirtyDaysAgo)
+        )
+      );
+    const monthlyClicks = monthlyClicksResult?.count || 0;
+
+    // Daily views (last 30 days) formatted as [{date: "01 feb", views: N}]
+    const dailyViewsRaw = await db
       .select({
-        date: sql<string>`DATE(${analyticsEvents.createdAt})`.as("date"),
-        views:
-          sql<number>`COUNT(*) FILTER (WHERE ${analyticsEvents.eventType} = 'view')`.as(
-            "views"
-          ),
-        clicks:
-          sql<number>`COUNT(*) FILTER (WHERE ${analyticsEvents.eventType} = 'click')`.as(
-            "clicks"
-          ),
+        date: sql<string>`TO_CHAR(${analyticsEvents.createdAt}, 'DD Mon')`.as(
+          "date"
+        ),
+        views: sql<number>`COUNT(*)`.as("views"),
       })
       .from(analyticsEvents)
-      .where(eq(analyticsEvents.profileId, profile.id))
-      .groupBy(sql`DATE(${analyticsEvents.createdAt})`)
+      .where(
+        and(
+          eq(analyticsEvents.profileId, profile.id),
+          eq(analyticsEvents.eventType, "view"),
+          gte(analyticsEvents.createdAt, thirtyDaysAgo)
+        )
+      )
+      .groupBy(
+        sql`DATE(${analyticsEvents.createdAt})`,
+        sql`TO_CHAR(${analyticsEvents.createdAt}, 'DD Mon')`
+      )
       .orderBy(sql`DATE(${analyticsEvents.createdAt})`);
 
-    // Button click breakdown
-    const buttonClicks = await db
+    const dailyViews = dailyViewsRaw.map((d) => ({
+      date: d.date.toLowerCase(),
+      views: Number(d.views),
+    }));
+
+    // Clicks by button formatted as [{button: "WhatsApp", clicks: N}]
+    const buttonClicksRaw = await db
       .select({
-        buttonName: analyticsEvents.buttonName,
-        count: sql<number>`COUNT(*)`.as("count"),
+        button: analyticsEvents.buttonName,
+        clicks: sql<number>`COUNT(*)`.as("clicks"),
       })
       .from(analyticsEvents)
-      .where(eq(analyticsEvents.profileId, profile.id))
+      .where(
+        and(
+          eq(analyticsEvents.profileId, profile.id),
+          eq(analyticsEvents.eventType, "click")
+        )
+      )
       .groupBy(analyticsEvents.buttonName)
       .orderBy(desc(sql`COUNT(*)`));
 
+    const clicksByButton = buttonClicksRaw
+      .filter((b) => b.button !== null)
+      .map((b) => ({
+        button: b.button as string,
+        clicks: Number(b.clicks),
+      }));
+
+    // Top button
+    const topButton = clicksByButton.length > 0 ? clicksByButton[0].button : "-";
+
     return NextResponse.json({
-      total_views: totalViews,
-      total_clicks: totalClicks,
-      daily_stats: dailyStats,
-      button_clicks: buttonClicks,
-      recent_events: events.slice(0, 50),
+      totalViews,
+      monthlyViews,
+      monthlyClicks,
+      topButton,
+      dailyViews,
+      clicksByButton,
     });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {

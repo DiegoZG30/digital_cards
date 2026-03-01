@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, MoreHorizontal, Loader2 } from "lucide-react";
+import { Search, MoreHorizontal, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,13 +46,14 @@ export default function AdminUsers() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
       const res = await fetch("/api/admin/users");
       if (!res.ok) throw new Error("Failed to fetch users");
       return res.json() as Promise<UserWithSubscription[]>;
     },
+    retry: 1,
   });
 
   // Mutation to update plan
@@ -115,7 +116,16 @@ export default function AdminUsers() {
             </div>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isError ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-3">
+                <AlertCircle className="h-8 w-8 text-destructive" />
+                <p className="text-sm text-muted-foreground">Error cargando usuarios</p>
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reintentar
+                </Button>
+              </div>
+            ) : isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>

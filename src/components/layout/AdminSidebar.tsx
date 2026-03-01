@@ -1,15 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CreditCard,
   LayoutDashboard,
   Users,
   Layout,
-  Mail,
-  Webhook,
-  Settings,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,13 +27,11 @@ const menuItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Usuarios", url: "/admin/users", icon: Users },
   { title: "Plantillas", url: "/admin/templates", icon: Layout },
-  { title: "Invitaciones", url: "/admin/invitations", icon: Mail },
-  { title: "Webhooks", url: "/admin/webhooks", icon: Webhook },
-  { title: "Configuracion", url: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (path: string) => {
     if (path === "/admin") {
@@ -45,9 +40,13 @@ export function AdminSidebar() {
     return pathname.startsWith(path);
   };
 
-  const handleLogout = () => {
-    // Will be implemented with auth
-    console.log("Logout");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // proceed to redirect even if request fails
+    }
+    router.push("/login");
   };
 
   return (

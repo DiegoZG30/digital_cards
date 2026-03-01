@@ -4,8 +4,9 @@ import { AdminLayout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Crown, Star, Clock, TrendingUp, Eye, DollarSign } from "lucide-react";
+import { Users, Crown, Star, Clock, TrendingUp, Eye, DollarSign, AlertCircle, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 // Pricing constants
@@ -85,13 +86,14 @@ export default function AdminDashboard() {
   const [realtimeStats, setRealtimeStats] = useState<DashboardStats | null>(null);
 
   // Fetch initial stats
-  const { data: stats, isLoading, refetch } = useQuery({
+  const { data: stats, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-dashboard-stats"],
     queryFn: async (): Promise<DashboardStats> => {
       const res = await fetch("/api/admin/stats");
       if (!res.ok) throw new Error("Failed to fetch stats");
       return res.json();
     },
+    retry: 1,
   });
 
   const displayStats = realtimeStats || stats;
@@ -136,6 +138,21 @@ export default function AdminDashboard() {
             En vivo
           </div>
         </div>
+
+        {isError && (
+          <Card className="bg-destructive/10 border-destructive/20">
+            <CardContent className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-destructive" />
+                <span className="text-sm text-destructive">Error cargando datos del dashboard</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reintentar
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Revenue Stats */}
         <div className="grid gap-4 md:grid-cols-3">
