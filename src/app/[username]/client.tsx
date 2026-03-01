@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import {
   CardHeader,
   ContactButtons,
@@ -47,6 +48,9 @@ interface PublicCardClientProps {
   isPro: boolean;
   themeClass: string;
   username: string;
+  /** Pre-processed template HTML from the server. When present, renders the
+   *  HTML template instead of the React component fallback. */
+  processedTemplateHtml?: string | null;
 }
 
 export function PublicCardClient({
@@ -58,9 +62,40 @@ export function PublicCardClient({
   isPro,
   themeClass,
   username,
+  processedTemplateHtml,
 }: PublicCardClientProps) {
   const { trackClick } = useAnalyticsTracking({ profileId: profile.id });
 
+  // ─── Template HTML render path ──────────────────────────────────────────────
+  // Renders the full template HTML inside an iframe so styles are fully isolated
+  // (the template is a self-contained HTML document with its own <head>/<body>).
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (!processedTemplateHtml || !iframeRef.current) return;
+
+    const iframe = iframeRef.current;
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
+
+    doc.open();
+    doc.write(processedTemplateHtml);
+    doc.close();
+  }, [processedTemplateHtml]);
+
+  if (processedTemplateHtml) {
+    return (
+      <iframe
+        ref={iframeRef}
+        title={`${profile.full_name || "Tarjeta"} - Biztec`}
+        className="w-full min-h-screen border-0"
+        style={{ display: "block", height: "100vh", width: "100%" }}
+        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      />
+    );
+  }
+
+  // ─── React component fallback (no template selected) ────────────────────────
   return (
     <div className={`min-h-screen bg-background ${themeClass}`}>
       <div className="mx-auto max-w-md min-h-screen bg-card shadow-xl">

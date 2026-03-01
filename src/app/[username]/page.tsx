@@ -3,12 +3,17 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import {
   profiles,
+  templates,
   testimonials,
   certificates,
   galleryImages,
 } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { PublicCardClient } from "./client";
+import {
+  processTemplateFull,
+  type ProcessableCardData,
+} from "@/lib/processTemplate";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -64,8 +69,8 @@ export default async function PublicCardPage({ params }: Props) {
     notFound();
   }
 
-  // Fetch related data in parallel
-  const [profileTestimonials, profileCertificates, profileGallery] =
+  // Fetch related data + template in parallel
+  const [profileTestimonials, profileCertificates, profileGallery, templateRow] =
     await Promise.all([
       db
         .select()
@@ -82,6 +87,18 @@ export default async function PublicCardPage({ params }: Props) {
         .from(galleryImages)
         .where(eq(galleryImages.profileId, profile.id))
         .orderBy(galleryImages.sortOrder),
+      // Fetch the selected template if it exists
+      profile.selectedTemplateId
+        ? db
+            .select({
+              htmlContent: templates.htmlContent,
+              sector: templates.sector,
+            })
+            .from(templates)
+            .where(eq(templates.id, profile.selectedTemplateId))
+            .limit(1)
+            .then((rows) => rows[0] ?? null)
+        : Promise.resolve(null),
     ]);
 
   // Map data to component-expected types
@@ -127,6 +144,80 @@ export default async function PublicCardPage({ params }: Props) {
         ? "theme-dark-blue"
         : "";
 
+  // ─── Process template server-side if available ────────────────────────────
+  let processedHtml: string | null = null;
+
+  if (templateRow?.htmlContent) {
+    // Build the CardData shape expected by processTemplateFull
+    const cardData: ProcessableCardData = {
+      profile: {
+        fullName: profile.fullName || "",
+        title: profile.title || "",
+        company: profile.company || "",
+        profileImage: profile.profileImageUrl || undefined,
+      },
+      slug: profile.slug || undefined,
+      contact: {
+        phone: profile.phone || undefined,
+        whatsapp: profile.whatsapp || undefined,
+        email: profile.email || undefined,
+      },
+      social: {
+        facebook: socialLinksData.facebook || undefined,
+        instagram: socialLinksData.instagram || undefined,
+        linkedin: socialLinksData.linkedin || undefined,
+        twitter: socialLinksData.twitter || undefined,
+        tiktok: socialLinksData.tiktok || undefined,
+        youtube: socialLinksData.youtube || undefined,
+      },
+      bio: profile.bio || undefined,
+      videoUrl: profile.videoUrl || undefined,
+      testimonials: profileTestimonials.map((t) => ({
+        name: t.name,
+        content: t.content,
+        rating: t.rating,
+        videoUrl: t.videoUrl || undefined,
+      })),
+      certificates: profileCertificates.map((c) => ({
+        name: c.name,
+        imageUrl: c.imageUrl || undefined,
+        licenseNumber: c.licenseNumber || undefined,
+      })),
+      gallery: profileGallery.map((g) => ({
+        imageUrl: g.imageUrl,
+        caption: g.caption || undefined,
+      })),
+      cta:
+        profile.ctaText && profile.ctaUrl
+          ? { text: profile.ctaText, url: profile.ctaUrl }
+          : undefined,
+      bookingUrl: profile.bookingUrl || undefined,
+      bookingType: (profile.bookingType as "popup" | "external") || undefined,
+      websiteUrl: profile.websiteUrl || undefined,
+      reviewUrl: profile.reviewUrl || undefined,
+      backgroundImage: profile.backgroundImageUrl || undefined,
+      sectionTitle: profile.sectionTitle || undefined,
+      services: (profile.services as Array<{ icon: string; name: string }>) || undefined,
+      ctaButtonText: profile.ctaButtonText || undefined,
+      // Spread custom_data so any extra fields (referBtnUrl, hours, etc.) are available
+      ...customData,
+    };
+
+    // Use the template's own sector (more accurate than profile.sector)
+    const sector = templateRow.sector || profile.sector || "general";
+
+    processedHtml = processTemplateFull({
+      htmlContent: templateRow.htmlContent,
+      cardData,
+      sector,
+      isPro,
+      customStyles: {
+        primaryColor: customStyles.primaryColor,
+        secondaryColor: customStyles.secondaryColor,
+      },
+    });
+  }
+
   return (
     <PublicCardClient
       profile={{
@@ -157,6 +248,7 @@ export default async function PublicCardPage({ params }: Props) {
       isPro={isPro}
       themeClass={themeClass}
       username={username}
+      processedTemplateHtml={processedHtml}
     />
   );
 }

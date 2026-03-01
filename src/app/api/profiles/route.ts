@@ -20,10 +20,13 @@ export async function GET() {
       .limit(1);
 
     if (!profile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        id: null,
+        userId: session.userId,
+        testimonials: [],
+        certificates: [],
+        gallery_images: [],
+      });
     }
 
     const [profileTestimonials, profileCertificates, profileGallery] =
@@ -68,17 +71,19 @@ export async function PUT(request: NextRequest) {
     const session = await requireAuth();
     const body = await request.json();
 
-    const [profile] = await db
+    let [profile] = await db
       .select({ id: profiles.id })
       .from(profiles)
       .where(eq(profiles.userId, session.userId))
       .limit(1);
 
+    // Upsert: create profile if it doesn't exist yet (new users)
     if (!profile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
+      const [newProfile] = await db
+        .insert(profiles)
+        .values({ userId: session.userId })
+        .returning({ id: profiles.id });
+      profile = newProfile;
     }
 
     // Extract related data from body

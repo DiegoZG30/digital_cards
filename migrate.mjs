@@ -1,8 +1,13 @@
 import { readFileSync, readdirSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import { spawn } from "child_process";
 import pg from "pg";
 
 const { Client } = pg;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 async function migrate() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -27,7 +32,7 @@ async function migrate() {
     `);
 
     // Read migration files
-    const migrationsDir = join(process.cwd(), "drizzle");
+    const migrationsDir = join(__dirname, "drizzle");
     const files = readdirSync(migrationsDir)
       .filter((f) => f.endsWith(".sql"))
       .sort();
@@ -67,4 +72,28 @@ async function migrate() {
   }
 }
 
-migrate();
+function runSeed() {
+  return new Promise((resolve, reject) => {
+    const seedPath = join(__dirname, "drizzle", "seed.mjs");
+    console.log("\n--- Running seed script ---");
+    const child = spawn("node", [seedPath], {
+      stdio: "inherit",
+      env: process.env,
+    });
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Seed script exited with code ${code}`));
+      }
+    });
+    child.on("error", reject);
+  });
+}
+
+async function main() {
+  await migrate();
+  await runSeed();
+}
+
+main();

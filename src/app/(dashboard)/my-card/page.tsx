@@ -10,7 +10,11 @@ import {
   Layout,
   Palette,
   Briefcase,
+  Globe,
+  Link as LinkIcon,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PlanProvider, usePlan } from "@/hooks/usePlan";
 import { useActiveTemplates, TemplateSector } from "@/hooks/useTemplates";
@@ -53,9 +57,11 @@ function MyCardEditor() {
     selectedTemplateId,
     previewTemplateId,
     selectedSector,
+    isPublished,
     selectSector,
     selectTemplate,
     previewTemplate,
+    updateIsPublished,
     hasChanges,
     isLoading,
     isSaving,
@@ -283,6 +289,30 @@ function MyCardEditor() {
                     <Eye className="w-4 h-4 mr-2" />
                     Preview
                   </Button>
+                )}
+
+                <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-1.5">
+                  <Globe className={`w-4 h-4 ${isPublished ? "text-green-500" : "text-muted-foreground"}`} />
+                  <Label htmlFor="publish-toggle" className="text-sm font-medium cursor-pointer whitespace-nowrap">
+                    Publicar tarjeta
+                  </Label>
+                  <Switch
+                    id="publish-toggle"
+                    checked={isPublished}
+                    onCheckedChange={updateIsPublished}
+                  />
+                </div>
+                {isPublished && cardData.slug && (
+                  <a
+                    href={`/${cardData.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                    title={`/${cardData.slug}`}
+                  >
+                    <LinkIcon className="w-3 h-3" />
+                    /{cardData.slug}
+                  </a>
                 )}
 
                 <Button

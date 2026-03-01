@@ -194,6 +194,7 @@ interface CardDataContextType {
   selectedTemplateId: string | null;
   previewTemplateId: string | null;
   selectedSector: TemplateSector | null;
+  isPublished: boolean;
   profileId: string | null;
   hasChanges: boolean;
   isLoading: boolean;
@@ -227,6 +228,9 @@ interface CardDataContextType {
 
   // Slug action
   updateSlug: (value: string) => void;
+
+  // Publish action
+  updateIsPublished: (value: boolean) => void;
 
   // Dynamic content actions
   updateBackgroundImage: (value: string) => void;
@@ -282,6 +286,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
   const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null);
   const [selectedSector, setSelectedSector] = useState<TemplateSector | null>(null);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [isPublished, setIsPublished] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -311,6 +316,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
 
       if (profile) {
         setProfileId(profile.id);
+        setIsPublished(profile.isPublished ?? profile.is_published ?? false);
         setSelectedTemplateId(profile.selectedTemplateId ?? profile.selected_template_id ?? null);
         // Load sector from database
         setSelectedSector((profile.sector as TemplateSector) || null);
@@ -516,6 +522,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
         // Profile fields
         selectedTemplateId: selectedTemplateId,
         sector: selectedSector,
+        isPublished: isPublished,
         fullName: cardData.profile.fullName,
         title: cardData.profile.title,
         company: cardData.profile.company,
@@ -598,7 +605,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
     } finally {
       setIsSaving(false);
     }
-  }, [user?.userId, profileId, selectedTemplateId, selectedSector, cardData, customStyles]);
+  }, [user?.userId, profileId, selectedTemplateId, selectedSector, cardData, customStyles, isPublished]);
 
   // Profile updates
   const updateProfile = useCallback((field: keyof CardData["profile"], value: string) => {
@@ -664,6 +671,12 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
   // Slug update
   const updateSlug = useCallback((value: string) => {
     setCardData(prev => ({ ...prev, slug: value }));
+    setHasChanges(true);
+  }, []);
+
+  // Publish toggle
+  const updateIsPublished = useCallback((value: boolean) => {
+    setIsPublished(value);
     setHasChanges(true);
   }, []);
 
@@ -865,6 +878,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
     selectedTemplateId,
     previewTemplateId,
     selectedSector,
+    isPublished,
     profileId,
     hasChanges,
     isLoading,
@@ -880,6 +894,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
     updateWebsiteUrl,
     updateReviewUrl,
     updateSlug,
+    updateIsPublished,
     updateBackgroundImage,
     updateSectionTitle,
     updateServices,
