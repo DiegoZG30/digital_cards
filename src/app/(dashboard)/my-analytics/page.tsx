@@ -70,11 +70,11 @@ export default function MyAnalytics() {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["my-analytics", user?.id],
+    queryKey: ["my-analytics", user?.userId],
     queryFn: async (): Promise<AnalyticsData> => {
       if (!user) throw new Error("No user");
 
-      const res = await fetch(`/api/analytics?userId=${user.id}`);
+      const res = await fetch(`/api/analytics?userId=${user.userId}`);
       if (!res.ok) throw new Error("Failed to fetch analytics");
       const data = await res.json();
       return data;

@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useCardData } from "@/hooks/useCardData";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function BackgroundImagesSection() {
@@ -23,7 +22,7 @@ export function BackgroundImagesSection() {
 
   const handleFileSelect = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user?.id) return;
+    if (!file || !user?.userId) return;
 
     if (!file.type.startsWith("image/")) {
       toast.error("Solo se permiten archivos de imagen");
@@ -37,22 +36,16 @@ export function BackgroundImagesSection() {
 
     setUploadingIndex(index);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/bg-${index + 1}-${Date.now()}.${fileExt}`;
+      const formData = new FormData();
+      formData.append("file", file);
 
-      const { error: uploadError } = await supabase.storage
-        .from("card-images")
-        .upload(fileName, file, { cacheControl: "3600", upsert: true });
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
 
-      if (uploadError) throw uploadError;
+      if (!res.ok) throw new Error(data.error || "Upload failed");
 
-      const { data: urlData } = supabase.storage
-        .from("card-images")
-        .getPublicUrl(fileName);
-
-      if (urlData?.publicUrl) {
-        const versionedUrl = `${urlData.publicUrl}?v=${Date.now()}`;
-        updateField(bgImages[index].key, versionedUrl);
+      if (data.url) {
+        updateField(bgImages[index].key, data.url);
         toast.success("Imagen subida correctamente");
       }
     } catch (error) {
@@ -106,7 +99,7 @@ export function BackgroundImagesSection() {
             ) : (
               <div className="h-20 rounded-lg border border-dashed border-border flex items-center justify-center">
                 <input
-                  ref={el => fileInputRefs.current[index] = el}
+                  ref={el => { fileInputRefs.current[index] = el; }}
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleFileSelect(index, e)}

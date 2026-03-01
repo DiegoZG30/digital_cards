@@ -539,7 +539,7 @@ function processTemplate(
     </div>
   `).join('');
 
-  const menuItemsHTML = menuItems.map(item => `
+  const menuItemsHTML = menuItems.map((item: any) => `
     <div class="menu-item">
       ${item.image ? `<img src="${item.image}" alt="${item.name}" class="menu-item-image">` : ''}
       <div class="menu-item-content">

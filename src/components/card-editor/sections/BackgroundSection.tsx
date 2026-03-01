@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useCardData } from "@/hooks/useCardData";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function BackgroundSection() {
@@ -16,7 +15,7 @@ export function BackgroundSection() {
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user?.id) return;
+    if (!file || !user?.userId) return;
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
@@ -32,29 +31,16 @@ export function BackgroundSection() {
 
     setIsUploading(true);
     try {
-      // Generate unique filename
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/background-${Date.now()}.${fileExt}`;
+      const formData = new FormData();
+      formData.append("file", file);
 
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from("card-images")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: true,
-        });
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
 
-      if (uploadError) throw uploadError;
+      if (!res.ok) throw new Error(data.error || "Upload failed");
 
-      // Get public URL with cache-busting timestamp
-      const { data: urlData } = supabase.storage
-        .from("card-images")
-        .getPublicUrl(fileName);
-
-      if (urlData?.publicUrl) {
-        // Add cache-busting query param to force browser refresh
-        const versionedUrl = `${urlData.publicUrl}?v=${Date.now()}`;
-        updateBackgroundImage(versionedUrl);
+      if (data.url) {
+        updateBackgroundImage(data.url);
         toast.success("Imagen subida correctamente");
       }
     } catch (error) {

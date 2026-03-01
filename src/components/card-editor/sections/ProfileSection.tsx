@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCardData } from "@/hooks/useCardData";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { profileSchema, slugSchema, formatSlug, getValidationError } from "@/lib/validations";
 
@@ -23,7 +22,7 @@ export function ProfileSection() {
 
   const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user?.id) return;
+    if (!file || !user?.userId) return;
 
     if (!file.type.startsWith("image/")) {
       toast.error("Solo se permiten archivos de imagen");
@@ -37,26 +36,16 @@ export function ProfileSection() {
 
     setIsUploadingProfile(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/profile-${Date.now()}.${fileExt}`;
+      const formData = new FormData();
+      formData.append("file", file);
 
-      const { error: uploadError } = await supabase.storage
-        .from("card-images")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: true,
-        });
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
 
-      if (uploadError) throw uploadError;
+      if (!res.ok) throw new Error(data.error || "Upload failed");
 
-      const { data: urlData } = supabase.storage
-        .from("card-images")
-        .getPublicUrl(fileName);
-
-      if (urlData?.publicUrl) {
-        // Add cache-busting query param
-        const versionedUrl = `${urlData.publicUrl}?v=${Date.now()}`;
-        updateProfile("profileImage", versionedUrl);
+      if (data.url) {
+        updateProfile("profileImage", data.url);
         toast.success("Foto de perfil subida");
       }
     } catch (error) {
