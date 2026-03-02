@@ -8,6 +8,9 @@ import {
   Users,
   Layout,
   LogOut,
+  Mail,
+  Webhook,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -27,6 +30,9 @@ const menuItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Usuarios", url: "/admin/users", icon: Users },
   { title: "Plantillas", url: "/admin/templates", icon: Layout },
+  { title: "Invitaciones", url: "/admin/invitations", icon: Mail },
+  { title: "Webhooks", url: "/admin/webhooks", icon: Webhook },
+  { title: "Configuración", url: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {

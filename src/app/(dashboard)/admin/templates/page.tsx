@@ -50,17 +50,38 @@ import {
 import {
   Plus,
   Search,
-  Edit,
+  Pencil,
   Eye,
   Trash2,
   Upload,
   Loader2,
   Layout,
+  UtensilsCrossed,
+  Home,
+  HardHat,
+  SprayCan,
+  Globe,
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 const SECTORS: TemplateSector[] = ["general", "restaurant", "real-estate", "construction", "cleaning"];
+
+const sectorStyles: Record<string, { bg: string; text: string; gradient: string }> = {
+  general: { bg: "bg-gray-500/20", text: "text-gray-400", gradient: "from-gray-700 to-gray-900" },
+  restaurant: { bg: "bg-red-500/20", text: "text-red-400", gradient: "from-red-800 to-red-950" },
+  "real-estate": { bg: "bg-green-500/20", text: "text-green-400", gradient: "from-green-800 to-green-950" },
+  construction: { bg: "bg-orange-500/20", text: "text-orange-400", gradient: "from-orange-800 to-orange-950" },
+  cleaning: { bg: "bg-blue-500/20", text: "text-blue-400", gradient: "from-blue-800 to-blue-950" },
+};
+
+const sectorIcons: Record<string, React.ReactNode> = {
+  general: <Globe className="h-10 w-10" />,
+  restaurant: <UtensilsCrossed className="h-10 w-10" />,
+  "real-estate": <Home className="h-10 w-10" />,
+  construction: <HardHat className="h-10 w-10" />,
+  cleaning: <SprayCan className="h-10 w-10" />,
+};
 
 interface TemplateFormData {
   name: string;
@@ -265,82 +286,89 @@ export default function AdminTemplates() {
           </div>
         ) : templates && templates.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {templates.map((template) => (
-              <Card key={template.id} className="bg-card border-border overflow-hidden card-hover">
-                {/* Thumbnail */}
-                <div className="aspect-video bg-muted relative">
-                  {template.thumbnail_url ? (
-                    <img
-                      src={template.thumbnail_url}
-                      alt={template.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Layout className="h-12 w-12 text-muted-foreground/50" />
+            {templates.map((template) => {
+              const style = sectorStyles[template.sector] || sectorStyles.general;
+              return (
+                <Card key={template.id} className="bg-card border-border overflow-hidden card-hover group">
+                  {/* Thumbnail */}
+                  <div className="aspect-video relative">
+                    {template.thumbnail_url ? (
+                      <img
+                        src={template.thumbnail_url}
+                        alt={template.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className={`w-full h-full bg-gradient-to-br ${style.gradient} flex items-center justify-center`}>
+                        <span className={`${style.text} opacity-60`}>
+                          {sectorIcons[template.sector] || sectorIcons.general}
+                        </span>
+                      </div>
+                    )}
+                    <span
+                      className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${style.bg} ${style.text} backdrop-blur-sm`}
+                    >
+                      {SECTOR_LABELS[template.sector]}
+                    </span>
+                  </div>
+
+                  <CardContent className="p-4 space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-foreground truncate text-base">
+                        {template.name}
+                      </h3>
+                      <Badge
+                        variant={template.is_active ? "default" : "secondary"}
+                        className={template.is_active ? "bg-emerald-500/20 text-emerald-400 border-0 text-xs" : "text-xs"}
+                      >
+                        {template.is_active ? "Activa" : "Inactiva"}
+                      </Badge>
                     </div>
-                  )}
-                  <Badge
-                    className="absolute top-2 right-2"
-                    style={{ backgroundColor: SECTOR_COLORS[template.sector] }}
-                  >
-                    {SECTOR_LABELS[template.sector]}
-                  </Badge>
-                </div>
 
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {template.name}
-                    </h3>
-                    <Badge variant={template.is_active ? "default" : "secondary"}>
-                      {template.is_active ? "Activa" : "Inactiva"}
-                    </Badge>
-                  </div>
+                    {template.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {template.description}
+                      </p>
+                    )}
 
-                  {template.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {template.description}
+                    <p className="text-xs text-muted-foreground">
+                      Creada: {format(new Date(template.created_at), "dd MMM yyyy", { locale: es })}
                     </p>
-                  )}
 
-                  <p className="text-xs text-muted-foreground">
-                    Creada: {format(new Date(template.created_at), "dd MMM yyyy", { locale: es })}
-                  </p>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleOpenModal(template)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Editar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePreview(template)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => {
-                        setDeleteTemplate(template);
-                        setIsDeleteOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2 border-t border-border/50">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleOpenModal(template)}
+                      >
+                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePreview(template)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          setDeleteTemplate(template);
+                          setIsDeleteOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         ) : (
           <Card className="bg-card border-border">
