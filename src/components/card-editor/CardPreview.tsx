@@ -346,11 +346,27 @@ export function CardPreview({ template, cardData, customStyles, isPro = false }:
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-[#1E1E1E] rounded-b-2xl z-20 pointer-events-none" />
 
               {/* Screen */}
-              <div className="bg-white rounded-[32px] overflow-hidden h-full">
+              <div className="bg-[#1a1a1a] rounded-[32px] overflow-hidden h-full flex flex-col">
+                {/* Status bar - pushes content below the notch */}
+                <div className="h-10 flex-shrink-0 flex items-end justify-between px-6 pb-1">
+                  <span className="text-[10px] text-white/60 font-medium">9:41</span>
+                  <div className="flex items-center gap-1">
+                    <div className="flex gap-[2px] items-end">
+                      <div className="w-[3px] h-[4px] bg-white/60 rounded-[0.5px]" />
+                      <div className="w-[3px] h-[6px] bg-white/60 rounded-[0.5px]" />
+                      <div className="w-[3px] h-[8px] bg-white/60 rounded-[0.5px]" />
+                      <div className="w-[3px] h-[10px] bg-white/30 rounded-[0.5px]" />
+                    </div>
+                    <div className="w-5 h-[10px] border border-white/60 rounded-[2px] ml-1 relative">
+                      <div className="absolute inset-[1px] right-[3px] bg-white/60 rounded-[1px]" />
+                    </div>
+                  </div>
+                </div>
+                {/* Card content */}
                 <iframe
                   key={previewKey}
                   srcDoc={previewContent || ""}
-                  className="w-full h-full border-0"
+                  className="w-full flex-1 border-0"
                   title="Card Preview Mobile"
                   sandbox="allow-scripts"
                 />
@@ -360,17 +376,18 @@ export function CardPreview({ template, cardData, customStyles, isPro = false }:
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent rounded-[40px] pointer-events-none" />
             </div>
           ) : (
-            /* Desktop Frame */
-            <div className="bg-white rounded-lg shadow-lg border border-border overflow-hidden w-full h-full max-w-[1200px]">
+            /* Desktop Frame - centered card in dark viewport */
+            <div className="bg-[#1a1a1a] rounded-lg shadow-lg border border-border/50 overflow-hidden w-full h-full max-w-[900px]">
               {/* Browser Bar */}
-              <div className="h-10 bg-gray-100 border-b flex items-center px-3 gap-2 flex-shrink-0">
+              <div className="h-10 bg-[#2d2d2d] border-b border-white/10 flex items-center px-3 gap-2 flex-shrink-0">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                  <div className="w-3 h-3 rounded-full bg-green-400" />
+                  <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                  <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                  <div className="w-3 h-3 rounded-full bg-[#28c840]" />
                 </div>
                 <div className="flex-1 mx-4">
-                  <div className="bg-white rounded-md px-3 py-1 text-xs text-gray-500 border">
+                  <div className="bg-[#1a1a1a] rounded-md px-3 py-1 text-xs text-white/50 border border-white/10 flex items-center gap-2">
+                    <svg className="w-3 h-3 text-green-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                     tu-tarjeta.biztec.com
                   </div>
                 </div>
@@ -378,7 +395,7 @@ export function CardPreview({ template, cardData, customStyles, isPro = false }:
               <iframe
                 key={previewKey}
                 srcDoc={previewContent || ""}
-                className="w-full border-0"
+                className="w-full border-0 bg-[#1a1a1a]"
                 style={{ height: 'calc(100% - 40px)' }}
                 title="Card Preview Desktop"
                 sandbox="allow-scripts"

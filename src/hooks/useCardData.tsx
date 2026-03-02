@@ -278,7 +278,7 @@ interface CardDataProviderProps {
 }
 
 export function CardDataProvider({ children }: CardDataProviderProps) {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   const [cardData, setCardData] = useState<CardData>(DEFAULT_CARD_DATA);
   const [customStyles, setCustomStyles] = useState<CustomStyles>(DEFAULT_STYLES);
@@ -294,7 +294,11 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
   // Load user profile from database via API
   const loadProfile = useCallback(async () => {
     if (!user?.userId) {
-      setIsLoading(false);
+      // Only stop loading if auth is done (user truly doesn't exist)
+      // If auth is still loading, keep isLoading=true to prevent flash
+      if (!isAuthLoading) {
+        setIsLoading(false);
+      }
       return;
     }
 
@@ -430,7 +434,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.userId]);
+  }, [user?.userId, isAuthLoading]);
 
   useEffect(() => {
     loadProfile();
