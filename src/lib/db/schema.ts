@@ -13,7 +13,7 @@ import {
 
 // ─── Enums ──────────────────────────────────────────────────────────────────────
 
-export const appRoleEnum = pgEnum("app_role", ["admin", "user"]);
+export const appRoleEnum = pgEnum("app_role", ["admin", "pro", "standard"]);
 export const templateSectorEnum = pgEnum("template_sector", [
   "general",
   "restaurant",
@@ -29,7 +29,7 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  role: appRoleEnum("role").default("user").notNull(),
+  role: appRoleEnum("role").default("standard").notNull(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

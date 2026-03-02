@@ -67,7 +67,7 @@ export async function getSession() {
     sessionId: user.sessionId,
     userId: user.userId,
     email: user.email,
-    role: user.role as "admin" | "user",
+    role: user.role as "admin" | "pro" | "standard",
   };
 }
 

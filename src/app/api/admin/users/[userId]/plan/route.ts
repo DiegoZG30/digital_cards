@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { subscriptions } from "@/lib/db/schema";
+import { subscriptions, users } from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
 import { eq } from "drizzle-orm";
 
@@ -12,16 +12,25 @@ export async function PUT(
     await requireAdmin();
 
     const { userId } = await params;
-    const { plan } = await request.json();
+    const body = await request.json();
 
-    if (!plan || !["standard", "pro"].includes(plan)) {
+    // Accept either { role } or { plan } - normalize to a single value
+    const value = body.role || body.plan;
+
+    if (!value || !["standard", "pro"].includes(value)) {
       return NextResponse.json(
-        { error: "Invalid plan. Must be 'standard' or 'pro'" },
+        { error: "Invalid role/plan. Must be 'standard' or 'pro'" },
         { status: 400 }
       );
     }
 
-    // Upsert: update if exists, insert if not
+    // Update the user's role in the users table
+    await db
+      .update(users)
+      .set({ role: value, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+
+    // Also upsert the subscription plan to keep them in sync
     const existing = await db
       .select({ id: subscriptions.id })
       .from(subscriptions)
@@ -31,16 +40,16 @@ export async function PUT(
     if (existing.length > 0) {
       await db
         .update(subscriptions)
-        .set({ plan, updatedAt: new Date() })
+        .set({ plan: value, updatedAt: new Date() })
         .where(eq(subscriptions.userId, userId));
     } else {
       await db.insert(subscriptions).values({
         userId,
-        plan,
+        plan: value,
       });
     }
 
-    return NextResponse.json({ success: true, plan });
+    return NextResponse.json({ success: true, role: value, plan: value });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -51,9 +60,9 @@ export async function PUT(
         { status: 403 }
       );
     }
-    console.error("Admin update plan error:", error);
+    console.error("Admin update role/plan error:", error);
     return NextResponse.json(
-      { error: "Failed to update plan" },
+      { error: "Failed to update role" },
       { status: 500 }
     );
   }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 
-export type AppRole = "admin" | "user";
+export type AppRole = "admin" | "pro" | "standard";
 
 interface AuthUser {
   userId: string;
@@ -13,14 +13,12 @@ interface AuthUser {
 interface AuthState {
   user: AuthUser | null;
   isLoading: boolean;
-  isAdmin: boolean;
 }
 
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
     user: null,
     isLoading: true,
-    isAdmin: false,
   });
 
   const checkSession = useCallback(async () => {
@@ -29,16 +27,12 @@ export function useAuth() {
       const data = await res.json();
 
       if (data.user) {
-        setState({
-          user: data.user,
-          isLoading: false,
-          isAdmin: data.user.role === "admin",
-        });
+        setState({ user: data.user, isLoading: false });
       } else {
-        setState({ user: null, isLoading: false, isAdmin: false });
+        setState({ user: null, isLoading: false });
       }
     } catch {
-      setState({ user: null, isLoading: false, isAdmin: false });
+      setState({ user: null, isLoading: false });
     }
   }, []);
 
@@ -48,8 +42,21 @@ export function useAuth() {
 
   const signOut = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    setState({ user: null, isLoading: false, isAdmin: false });
+    setState({ user: null, isLoading: false });
   };
 
-  return { ...state, signOut, refetch: checkSession };
+  const user = state.user;
+  const isAdmin = user?.role === "admin";
+  const isPro = user?.role === "pro" || isAdmin;
+  const isStandard = user?.role === "standard";
+
+  return {
+    user,
+    isLoading: state.isLoading,
+    isAdmin,
+    isPro,
+    isStandard,
+    signOut,
+    refetch: checkSession,
+  };
 }

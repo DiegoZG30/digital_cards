@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminLayout } from "@/components/layout";
+import { UserLayout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,7 +86,8 @@ export default function AdminWebhooks() {
   };
 
   return (
-    <AdminLayout>
+    <UserLayout>
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Webhooks</h1>
@@ -195,6 +196,7 @@ export default function AdminWebhooks() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+      </div>
+    </UserLayout>
   );
 }

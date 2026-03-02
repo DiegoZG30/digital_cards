@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AdminLayout } from "@/components/layout";
+import { UserLayout } from "@/components/layout";
 import { useAuth } from "@/hooks/useAuth";
 import {
   useTemplates,
@@ -132,11 +132,13 @@ export default function AdminTemplates() {
 
   if (authLoading) {
     return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <UserLayout>
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
         </div>
-      </AdminLayout>
+      </UserLayout>
     );
   }
 
@@ -233,7 +235,8 @@ export default function AdminTemplates() {
   const isSaving = createMutation.isPending || updateMutation.isPending || uploadThumbnailMutation.isPending;
 
   return (
-    <AdminLayout>
+    <UserLayout>
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -384,6 +387,7 @@ export default function AdminTemplates() {
             </CardContent>
           </Card>
         )}
+      </div>
       </div>
 
       {/* Create/Edit Modal */}
@@ -583,6 +587,6 @@ export default function AdminTemplates() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </UserLayout>
   );
 }

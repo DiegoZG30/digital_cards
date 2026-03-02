@@ -12,6 +12,7 @@ export async function GET() {
       .select({
         id: users.id,
         email: users.email,
+        role: users.role,
         created_at: users.createdAt,
         plan: subscriptions.plan,
         expires_at: subscriptions.expiresAt,
@@ -24,6 +25,7 @@ export async function GET() {
     const formatted = result.map((row) => ({
       id: row.id,
       email: row.email,
+      role: row.role,
       created_at: row.created_at?.toISOString() || "",
       subscription: row.plan
         ? {

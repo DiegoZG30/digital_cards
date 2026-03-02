@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminLayout } from "@/components/layout";
+import { UserLayout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -124,7 +124,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <AdminLayout>
+    <UserLayout>
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -342,6 +343,7 @@ export default function AdminDashboard() {
           </Card>
         </div>
       </div>
-    </AdminLayout>
+      </div>
+    </UserLayout>
   );
 }
