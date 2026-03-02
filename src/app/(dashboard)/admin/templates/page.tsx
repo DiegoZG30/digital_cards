@@ -151,9 +151,9 @@ export default function AdminTemplates() {
         name: template.name,
         sector: template.sector,
         description: template.description || "",
-        html_content: template.html_content,
-        thumbnail_url: template.thumbnail_url || "",
-        is_active: template.is_active,
+        html_content: template.htmlContent || template.html_content,
+        thumbnail_url: template.thumbnailUrl || template.thumbnail_url || "",
+        is_active: template.isActive ?? template.is_active,
       });
     } else {
       setEditingTemplate(null);
@@ -292,9 +292,9 @@ export default function AdminTemplates() {
                 <Card key={template.id} className="bg-card border-border overflow-hidden card-hover group">
                   {/* Thumbnail */}
                   <div className="aspect-video relative">
-                    {template.thumbnail_url ? (
+                    {(template.thumbnailUrl || template.thumbnail_url) ? (
                       <img
-                        src={template.thumbnail_url}
+                        src={template.thumbnailUrl || template.thumbnail_url || undefined}
                         alt={template.name}
                         className="w-full h-full object-cover"
                       />
@@ -318,10 +318,10 @@ export default function AdminTemplates() {
                         {template.name}
                       </h3>
                       <Badge
-                        variant={template.is_active ? "default" : "secondary"}
-                        className={template.is_active ? "bg-emerald-500/20 text-emerald-400 border-0 text-xs" : "text-xs"}
+                        variant={(template.isActive ?? template.is_active) ? "default" : "secondary"}
+                        className={(template.isActive ?? template.is_active) ? "bg-emerald-500/20 text-emerald-400 border-0 text-xs" : "text-xs"}
                       >
-                        {template.is_active ? "Activa" : "Inactiva"}
+                        {(template.isActive ?? template.is_active) ? "Activa" : "Inactiva"}
                       </Badge>
                     </div>
 
@@ -332,7 +332,7 @@ export default function AdminTemplates() {
                     )}
 
                     <p className="text-xs text-muted-foreground">
-                      Creada: {format(new Date(template.created_at), "dd MMM yyyy", { locale: es })}
+                      Creada: {format(new Date(template.createdAt || template.created_at), "dd MMM yyyy", { locale: es })}
                     </p>
 
                     {/* Actions */}
@@ -550,7 +550,7 @@ export default function AdminTemplates() {
           <div className="bg-white rounded-lg overflow-hidden">
             {previewTemplate && (
               <iframe
-                srcDoc={previewTemplate.html_content}
+                srcDoc={previewTemplate.htmlContent || previewTemplate.html_content}
                 className="w-full h-[60vh] border-0"
                 title="Template Preview"
               />

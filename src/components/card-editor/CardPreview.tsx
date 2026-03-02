@@ -275,7 +275,7 @@ export function CardPreview({ template, cardData, customStyles, isPro = false }:
     if (!template) return null;
 
     const html = processTemplateFull({
-      htmlContent: template.html_content,
+      htmlContent: template.htmlContent || template.html_content,
       cardData: {
         profile: data.profile,
         contact: data.contact,

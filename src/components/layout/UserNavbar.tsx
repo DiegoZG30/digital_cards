@@ -4,13 +4,27 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { CreditCard, CreditCard as CardIcon, BarChart3, LogOut, ChevronDown } from "lucide-react";
+import {
+  CreditCard,
+  CreditCard as CardIcon,
+  BarChart3,
+  LogOut,
+  ChevronDown,
+  Shield,
+  LayoutDashboard,
+  Users,
+  Palette,
+  Mail,
+  Webhook,
+  Settings,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -27,7 +41,7 @@ interface UserNavbarProps {
 export function UserNavbar({ user }: UserNavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { signOut } = useAuth();
+  const { signOut, isAdmin } = useAuth();
 
   // Demo user for preview
   const currentUser = user || {
@@ -45,6 +59,15 @@ export function UserNavbar({ user }: UserNavbarProps) {
     .slice(0, 2);
 
   const isActive = (path: string) => pathname === path;
+
+  const adminLinks = [
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/users", label: "Usuarios", icon: Users },
+    { href: "/admin/templates", label: "Templates", icon: Palette },
+    { href: "/admin/invitations", label: "Invitaciones", icon: Mail },
+    { href: "/admin/webhooks", label: "Webhooks", icon: Webhook },
+    { href: "/admin/settings", label: "Configuracion", icon: Settings },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -97,6 +120,46 @@ export function UserNavbar({ user }: UserNavbarProps) {
               </Link>
             </Button>
           )}
+
+          {isAdmin && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={pathname?.startsWith("/admin") ? "secondary" : "ghost"}
+                  className={cn(
+                    "gap-1 border border-transparent",
+                    pathname?.startsWith("/admin")
+                      ? "text-amber-500 border-amber-500/30 bg-amber-500/10"
+                      : "text-amber-500/80 hover:text-amber-500 hover:border-amber-500/20"
+                  )}
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-52 border-amber-500/20">
+                <DropdownMenuLabel className="text-amber-500 text-xs uppercase tracking-wider">
+                  Administracion
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {adminLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        "cursor-pointer",
+                        pathname === link.href && "bg-amber-500/10 text-amber-500"
+                      )}
+                    >
+                      <link.icon className="mr-2 h-4 w-4" />
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </nav>
 
         {/* User Menu */}
@@ -136,6 +199,28 @@ export function UserNavbar({ user }: UserNavbarProps) {
                   Mis Metricas
                 </Link>
               </DropdownMenuItem>
+            )}
+            {isAdmin && (
+              <>
+                <DropdownMenuSeparator className="md:hidden" />
+                <DropdownMenuLabel className="md:hidden text-amber-500 text-xs uppercase tracking-wider">
+                  Admin
+                </DropdownMenuLabel>
+                {adminLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild className="md:hidden">
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        "cursor-pointer",
+                        pathname === link.href && "bg-amber-500/10 text-amber-500"
+                      )}
+                    >
+                      <link.icon className="mr-2 h-4 w-4" />
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </>
             )}
             <DropdownMenuSeparator className="md:hidden" />
             <DropdownMenuItem

@@ -199,9 +199,9 @@ function TemplateCard({ template, isSelected, isPreviewing, onPreview }: Templat
     >
       {/* Thumbnail */}
       <div className="aspect-[4/3] bg-muted relative">
-        {template.thumbnail_url ? (
+        {(template.thumbnailUrl || template.thumbnail_url) ? (
           <img
-            src={template.thumbnail_url}
+            src={template.thumbnailUrl || template.thumbnail_url || undefined}
             alt={template.name}
             className="w-full h-full object-cover"
           />

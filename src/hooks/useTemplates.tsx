@@ -17,7 +17,9 @@ export interface Template {
   is_active: boolean;
   isActive: boolean;
   created_at: string;
+  createdAt: string;
   updated_at: string;
+  updatedAt: string;
   editor_schema: unknown;
   editorSchema: unknown;
 }
