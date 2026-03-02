@@ -69,41 +69,121 @@ export default async function PublicCardPage({ params }: Props) {
     notFound();
   }
 
-  // Fetch related data + template in parallel
-  const [profileTestimonials, profileCertificates, profileGallery, templateRow] =
-    await Promise.all([
-      db
-        .select()
-        .from(testimonials)
-        .where(eq(testimonials.profileId, profile.id))
-        .orderBy(testimonials.sortOrder),
-      db
-        .select()
-        .from(certificates)
-        .where(eq(certificates.profileId, profile.id))
-        .orderBy(certificates.sortOrder),
-      db
-        .select()
-        .from(galleryImages)
-        .where(eq(galleryImages.profileId, profile.id))
-        .orderBy(galleryImages.sortOrder),
-      // Fetch the selected template if it exists
-      profile.selectedTemplateId
-        ? db
-            .select({
-              htmlContent: templates.htmlContent,
-              sector: templates.sector,
-            })
-            .from(templates)
-            .where(eq(templates.id, profile.selectedTemplateId))
-            .limit(1)
-            .then((rows) => rows[0] ?? null)
-        : Promise.resolve(null),
-    ]);
+  // Use published snapshot if available, otherwise fallback to live data
+  const publishedSnapshot = profile.publishedData as Record<string, unknown> | null;
+
+  // ─── Fetch related data + template ──────────────────────────────────────────
+  let profileTestimonials: Array<{
+    id: string;
+    name: string;
+    content: string;
+    rating: number;
+    videoUrl: string | null;
+    imageUrl?: string | null;
+    licenseNumber?: string | null;
+    sortOrder?: number | null;
+  }>;
+  let profileCertificates: Array<{
+    id: string;
+    name: string;
+    imageUrl: string | null;
+    licenseNumber: string | null;
+    sortOrder?: number | null;
+  }>;
+  let profileGallery: Array<{
+    id: string;
+    imageUrl: string;
+    caption: string | null;
+    sortOrder?: number | null;
+  }>;
+  let templateRow: { htmlContent: string; sector: string | null } | null;
+
+  if (publishedSnapshot) {
+    // Extract related data directly from the snapshot
+    profileTestimonials = (
+      (publishedSnapshot.testimonials as Array<Record<string, unknown>>) || []
+    ).map((t) => ({
+      id: (t.id as string) || crypto.randomUUID(),
+      name: (t.name as string) || "",
+      content: (t.content as string) || "",
+      rating: (t.rating as number) ?? 5,
+      videoUrl: (t.videoUrl as string | null) || null,
+    }));
+
+    profileCertificates = (
+      (publishedSnapshot.certificates as Array<Record<string, unknown>>) || []
+    ).map((c) => ({
+      id: (c.id as string) || crypto.randomUUID(),
+      name: (c.name as string) || "",
+      imageUrl: (c.imageUrl as string | null) || null,
+      licenseNumber: (c.licenseNumber as string | null) || null,
+    }));
+
+    profileGallery = (
+      (publishedSnapshot.gallery_images as Array<Record<string, unknown>>) || []
+    ).map((g) => ({
+      id: (g.id as string) || crypto.randomUUID(),
+      imageUrl: (g.imageUrl as string) || "",
+      caption: (g.caption as string | null) || null,
+    }));
+
+    // Only fetch the template HTML (not stored in snapshot)
+    const snapshotTemplateId = publishedSnapshot.selectedTemplateId as string | null;
+    templateRow = snapshotTemplateId
+      ? await db
+          .select({
+            htmlContent: templates.htmlContent,
+            sector: templates.sector,
+          })
+          .from(templates)
+          .where(eq(templates.id, snapshotTemplateId))
+          .limit(1)
+          .then((rows) => rows[0] ?? null)
+      : null;
+  } else {
+    // Backward compatibility: fetch from related tables
+    const [dbTestimonials, dbCertificates, dbGallery, dbTemplate] =
+      await Promise.all([
+        db
+          .select()
+          .from(testimonials)
+          .where(eq(testimonials.profileId, profile.id))
+          .orderBy(testimonials.sortOrder),
+        db
+          .select()
+          .from(certificates)
+          .where(eq(certificates.profileId, profile.id))
+          .orderBy(certificates.sortOrder),
+        db
+          .select()
+          .from(galleryImages)
+          .where(eq(galleryImages.profileId, profile.id))
+          .orderBy(galleryImages.sortOrder),
+        profile.selectedTemplateId
+          ? db
+              .select({
+                htmlContent: templates.htmlContent,
+                sector: templates.sector,
+              })
+              .from(templates)
+              .where(eq(templates.id, profile.selectedTemplateId))
+              .limit(1)
+              .then((rows) => rows[0] ?? null)
+          : Promise.resolve(null),
+      ]);
+
+    profileTestimonials = dbTestimonials;
+    profileCertificates = dbCertificates;
+    profileGallery = dbGallery;
+    templateRow = dbTemplate;
+  }
+
+  // ─── Data source: snapshot fields (camelCase) or live profile ──────────────
+  const src: Record<string, unknown> = publishedSnapshot || (profile as unknown as Record<string, unknown>);
 
   // Map data to component-expected types
   const socialLinksData =
-    (profile.socialLinks as Record<string, string>) || {};
+    ((src.socialLinks ?? src.social_links ?? {}) as Record<string, string>);
   const socialLinksArray = Object.entries(socialLinksData)
     .filter(([_, url]) => url && (url as string).trim() !== "")
     .map(([network, url]) => ({ network, url: url as string }));
@@ -127,11 +207,13 @@ export default async function PublicCardPage({ params }: Props) {
   }));
 
   const customStyles =
-    (profile.customStyles as Record<string, string>) || {};
+    ((src.customStyles ?? src.custom_styles ?? {}) as Record<string, string>);
   const customData =
-    (profile.customData as Record<string, unknown>) || {};
+    ((src.customData ?? src.custom_data ?? {}) as Record<string, unknown>);
+
+  const srcVideoUrl = (src.videoUrl ?? src.video_url ?? null) as string | null;
   const isPro = !!(
-    profile.videoUrl ||
+    srcVideoUrl ||
     mappedGallery.length > 0 ||
     mappedTestimonials.length > 0 ||
     mappedCertificates.length > 0
@@ -144,6 +226,10 @@ export default async function PublicCardPage({ params }: Props) {
         ? "theme-dark-blue"
         : "";
 
+  // ─── Helper to read from src with camelCase (snapshot) or live profile ─────
+  const str = (camel: string): string | null =>
+    (src[camel] as string | null) ?? null;
+
   // ─── Process template server-side if available ────────────────────────────
   let processedHtml: string | null = null;
 
@@ -151,16 +237,16 @@ export default async function PublicCardPage({ params }: Props) {
     // Build the CardData shape expected by processTemplateFull
     const cardData: ProcessableCardData = {
       profile: {
-        fullName: profile.fullName || "",
-        title: profile.title || "",
-        company: profile.company || "",
-        profileImage: profile.profileImageUrl || undefined,
+        fullName: str("fullName") || "",
+        title: str("title") || "",
+        company: str("company") || "",
+        profileImage: str("profileImageUrl") || undefined,
       },
       slug: profile.slug || undefined,
       contact: {
-        phone: profile.phone || undefined,
-        whatsapp: profile.whatsapp || undefined,
-        email: profile.email || undefined,
+        phone: str("phone") || undefined,
+        whatsapp: str("whatsapp") || undefined,
+        email: str("email") || undefined,
       },
       social: {
         facebook: socialLinksData.facebook || undefined,
@@ -170,8 +256,8 @@ export default async function PublicCardPage({ params }: Props) {
         tiktok: socialLinksData.tiktok || undefined,
         youtube: socialLinksData.youtube || undefined,
       },
-      bio: profile.bio || undefined,
-      videoUrl: profile.videoUrl || undefined,
+      bio: str("bio") || undefined,
+      videoUrl: str("videoUrl") || undefined,
       testimonials: profileTestimonials.map((t) => ({
         name: t.name,
         content: t.content,
@@ -188,23 +274,24 @@ export default async function PublicCardPage({ params }: Props) {
         caption: g.caption || undefined,
       })),
       cta:
-        profile.ctaText && profile.ctaUrl
-          ? { text: profile.ctaText, url: profile.ctaUrl }
+        str("ctaText") && str("ctaUrl")
+          ? { text: str("ctaText")!, url: str("ctaUrl")! }
           : undefined,
-      bookingUrl: profile.bookingUrl || undefined,
-      bookingType: (profile.bookingType as "popup" | "external") || undefined,
-      websiteUrl: profile.websiteUrl || undefined,
-      reviewUrl: profile.reviewUrl || undefined,
-      backgroundImage: profile.backgroundImageUrl || undefined,
-      sectionTitle: profile.sectionTitle || undefined,
-      services: (profile.services as Array<{ icon: string; name: string }>) || undefined,
-      ctaButtonText: profile.ctaButtonText || undefined,
+      bookingUrl: str("bookingUrl") || undefined,
+      bookingType: (str("bookingType") as "popup" | "external") || undefined,
+      websiteUrl: str("websiteUrl") || undefined,
+      reviewUrl: str("reviewUrl") || undefined,
+      backgroundImage: str("backgroundImageUrl") || undefined,
+      sectionTitle: str("sectionTitle") || undefined,
+      services: (src.services as Array<{ icon: string; name: string }>) || undefined,
+      ctaButtonText: str("ctaButtonText") || undefined,
       // Spread custom_data so any extra fields (referBtnUrl, hours, etc.) are available
       ...customData,
     };
 
     // Use the template's own sector (more accurate than profile.sector)
-    const sector = templateRow.sector || profile.sector || "general";
+    const srcSector = (src.sector as string | null) || null;
+    const sector = templateRow.sector || srcSector || "general";
 
     processedHtml = processTemplateFull({
       htmlContent: templateRow.htmlContent,
@@ -222,22 +309,22 @@ export default async function PublicCardPage({ params }: Props) {
     <PublicCardClient
       profile={{
         id: profile.id,
-        full_name: profile.fullName,
-        title: profile.title,
-        company: profile.company,
-        bio: profile.bio,
-        profile_image_url: profile.profileImageUrl,
-        cover_image_url: profile.coverImageUrl,
-        phone: profile.phone,
-        email: profile.email,
-        whatsapp: profile.whatsapp,
-        video_url: profile.videoUrl,
+        full_name: str("fullName"),
+        title: str("title"),
+        company: str("company"),
+        bio: str("bio"),
+        profile_image_url: str("profileImageUrl"),
+        cover_image_url: str("coverImageUrl"),
+        phone: str("phone"),
+        email: str("email"),
+        whatsapp: str("whatsapp"),
+        video_url: str("videoUrl"),
         slug: profile.slug,
-        sector: profile.sector,
-        services: profile.services as Array<{
+        sector: (src.sector as string | null) ?? null,
+        services: (src.services as Array<{
           icon: string;
           name: string;
-        }> | null,
+        }>) || null,
         custom_data: customData,
         custom_styles: customStyles,
       }}

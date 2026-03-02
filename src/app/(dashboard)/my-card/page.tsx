@@ -13,8 +13,6 @@ import {
   Globe,
   Link as LinkIcon,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PlanProvider, usePlan } from "@/hooks/usePlan";
 import { useActiveTemplates, TemplateSector } from "@/hooks/useTemplates";
@@ -58,10 +56,14 @@ function MyCardEditor() {
     previewTemplateId,
     selectedSector,
     isPublished,
+    publishedAt,
+    hasUnpublishedChanges,
     selectSector,
     selectTemplate,
     previewTemplate,
     updateIsPublished,
+    publishToLive,
+    unpublish,
     hasChanges,
     isLoading,
     isSaving,
@@ -291,17 +293,22 @@ function MyCardEditor() {
                   </Button>
                 )}
 
-                <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-1.5">
-                  <Globe className={`w-4 h-4 ${isPublished ? "text-green-500" : "text-muted-foreground"}`} />
-                  <Label htmlFor="publish-toggle" className="text-sm font-medium cursor-pointer whitespace-nowrap">
-                    Publicar tarjeta
-                  </Label>
-                  <Switch
-                    id="publish-toggle"
-                    checked={isPublished}
-                    onCheckedChange={updateIsPublished}
-                  />
-                </div>
+                {isPublished && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 text-green-500 text-sm">
+                      <Globe className="w-4 h-4" />
+                      <span className="font-medium">Publicada</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-muted-foreground hover:text-destructive"
+                      onClick={unpublish}
+                    >
+                      Despublicar
+                    </Button>
+                  </div>
+                )}
                 {isPublished && cardData.slug && (
                   <a
                     href={`/${cardData.slug}`}
@@ -316,17 +323,35 @@ function MyCardEditor() {
                 )}
 
                 <Button
-                  className="btn-gold-glow bg-primary text-primary-foreground hover:bg-primary/90"
+                  variant="outline"
                   onClick={handleSave}
                   disabled={!hasChanges || isSaving}
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {isSaving ? "Guardando..." : "Guardar"}
+                  {isSaving ? "Guardando..." : "Guardar borrador"}
+                </Button>
+
+                <Button
+                  className="btn-gold-glow bg-primary text-primary-foreground hover:bg-primary/90"
+                  onClick={publishToLive}
+                  disabled={isSaving}
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  {isPublished ? "Publicar cambios" : "Publicar tarjeta"}
                 </Button>
               </div>
             </div>
           </div>
         </div>
+
+        {isPublished && hasChanges && (
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2">
+            <div className="container mx-auto flex items-center gap-2 text-sm text-amber-400">
+              <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              Tienes cambios sin publicar. Tu tarjeta publica no se ha actualizado.
+            </div>
+          </div>
+        )}
 
         <div className="container mx-auto px-4 py-6">
           <div className="flex gap-6">

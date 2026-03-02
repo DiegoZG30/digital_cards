@@ -84,6 +84,8 @@ export const profiles = pgTable(
     ),
     slug: text("slug").unique(),
     isPublished: boolean("is_published").default(false),
+    publishedData: jsonb("published_data"),
+    publishedAt: timestamp("published_at"),
     fullName: text("full_name"),
     title: text("title"),
     company: text("company"),

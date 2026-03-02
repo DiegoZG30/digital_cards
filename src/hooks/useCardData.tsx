@@ -195,6 +195,8 @@ interface CardDataContextType {
   previewTemplateId: string | null;
   selectedSector: TemplateSector | null;
   isPublished: boolean;
+  publishedAt: string | null;
+  hasUnpublishedChanges: boolean;
   profileId: string | null;
   hasChanges: boolean;
   isLoading: boolean;
@@ -266,6 +268,8 @@ interface CardDataContextType {
 
   // Save/Reset
   saveToDatabase: () => Promise<void>;
+  publishToLive: () => Promise<void>;
+  unpublish: () => Promise<void>;
   markAsSaved: () => void;
   resetChanges: () => void;
   refetch: () => Promise<void>;
@@ -290,6 +294,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
   const [hasChanges, setHasChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [publishedAt, setPublishedAt] = useState<string | null>(null);
 
   // Load user profile from database via API
   const loadProfile = useCallback(async () => {
@@ -321,6 +326,7 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
       if (profile) {
         setProfileId(profile.id);
         setIsPublished(profile.isPublished ?? profile.is_published ?? false);
+        setPublishedAt(profile.publishedAt ?? profile.published_at ?? null);
         setSelectedTemplateId(profile.selectedTemplateId ?? profile.selected_template_id ?? null);
         // Load sector from database
         setSelectedSector((profile.sector as TemplateSector) || null);
@@ -865,6 +871,42 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
     setHasChanges(true);
   }, []);
 
+  // Publish: save draft then snapshot to published_data
+  const publishToLive = useCallback(async () => {
+    await saveToDatabase();
+    try {
+      const res = await fetch("/api/profiles/publish", { method: "POST" });
+      if (!res.ok) throw new Error("Publish failed");
+      const data = await res.json();
+      setIsPublished(true);
+      setPublishedAt(data.publishedAt);
+      setHasChanges(false);
+      toast.success("Tarjeta publicada exitosamente");
+    } catch (error) {
+      console.error("Publish error:", error);
+      toast.error("Error al publicar la tarjeta");
+    }
+  }, [saveToDatabase]);
+
+  // Unpublish: hide public card
+  const unpublish = useCallback(async () => {
+    try {
+      const res = await fetch("/api/profiles", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublished: false }),
+      });
+      if (!res.ok) throw new Error("Unpublish failed");
+      setIsPublished(false);
+      toast.success("Tarjeta despublicada");
+    } catch (error) {
+      console.error("Unpublish error:", error);
+      toast.error("Error al despublicar");
+    }
+  }, []);
+
+  const hasUnpublishedChanges = isPublished && hasChanges;
+
   // Mark as saved
   const markAsSaved = useCallback(() => {
     setHasChanges(false);
@@ -883,6 +925,8 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
     previewTemplateId,
     selectedSector,
     isPublished,
+    publishedAt,
+    hasUnpublishedChanges,
     profileId,
     hasChanges,
     isLoading,
@@ -918,6 +962,8 @@ export function CardDataProvider({ children }: CardDataProviderProps) {
     previewTemplate,
     selectSector,
     saveToDatabase,
+    publishToLive,
+    unpublish,
     markAsSaved,
     resetChanges,
     refetch: loadProfile,
